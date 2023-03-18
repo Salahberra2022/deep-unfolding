@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deep_unfolding"
+description = "deep unfolding of iterative methods"
+version = "0.2.0"
+authors = [ { name = "Salah Berra", email = "salahberra39@gmail.com" } ]
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = [
+    "deep unfolding",
+    "iterative methods",
+    "trainable parameters",
+    "linear equation",
+    "optimization parameters"]
+license = {text = "GPL"}
+# https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering"
+]
+dependencies = [ "numpy >= 1.20" , "torch >= 1.10.1" ]
+
+[tool.setuptools]
+packages = ["deep_unfolding"]
+
+
+
+
+
