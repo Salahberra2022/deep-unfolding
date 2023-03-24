@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "deep_unfolding"
 description = "deep unfolding of iterative methods"
-version = "0.2.0"
+version = "0.3.0"
 authors = [ { name = "Salah Berra", email = "salahberra39@gmail.com" } ]
 readme = "README.md"
 requires-python = ">=3.7"

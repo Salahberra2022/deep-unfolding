@@ -1,6 +1,6 @@
 # Description the code 
 
-## Intislzation value
+## Initialization value
 ```python
 ## model parameters 
 itr = 25 
@@ -71,7 +71,7 @@ invM = np.linalg.inv(D +L)
     the model of SOR method
     '''
 ```
-## The conventional SOR with optumuin value
+## The conventional SOR with optimum in value
 ```python
    class SOR(nn.Module):
     '''
@@ -104,7 +104,7 @@ invM = np.linalg.inv(D +L)
 
 sor_model = SOR(itr).to(device)
 ```
-## The deep unfodling of  SOR , as SORNet
+## The deep unfolding of  SOR , as SORNet
 
 ```python
 ## Deep unfolded SOR with a constant step size 
