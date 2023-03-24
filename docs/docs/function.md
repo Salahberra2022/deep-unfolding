@@ -251,17 +251,8 @@ for i in range(total_itr+1):
 ```
 ## The result  
 
-<figure markdown>
-  ![The Iterative method SOR and SORNet](https://user-images.githubusercontent.com/119638218/226128899-87742a0f-7b82-4d24-9d78-27104c4d8f86.png){ width="800" }
-  <figcaption>The Iterative method SOR and SORNet</figcaption>
-</figure>
+ ![SOR](https://user-images.githubusercontent.com/119638218/226128899-87742a0f-7b82-4d24-9d78-27104c4d8f86.png)
+ 
+![RI](https://user-images.githubusercontent.com/119638218/226128930-f8832bfe-437f-48aa-8e07-37fc5082a15f.png)
 
-<figure markdown>
-  ![The Iterative method SOR and SORNet]([RI.png](https://user-images.githubusercontent.com/119638218/226128930-f8832bfe-437f-48aa-8e07-37fc5082a15f.png)){ width="800" }
-  <figcaption>The Iterative method RI and RINet</figcaption>
-</figure>
-
-<figure markdown>
-  ![The Iterative method SOR and SORNet]([AOR.png](https://user-images.githubusercontent.com/119638218/226128945-30b1c022-4a15-4182-b078-966408be4167.png)){ width="800" }
-  <figcaption>The Iterative method AOR and AORNet</figcaption>
-</figure>
+![AOR](https://user-images.githubusercontent.com/119638218/226128945-30b1c022-4a15-4182-b078-966408be4167.png)
