@@ -112,10 +112,7 @@ $\mathbf{x}^{(t+1)}=(\mathbf{D}-\omega_{t}\mathbf{L})^{-1}((1-\omega_{t})\mathbf
 
 here $t$ is the number of training. The trainable internal parameters, such as $\omega_{t}$ parameter, can be optimized with standard deep learning techniques, i.e., the back propagation and stochastic gradient descent algorithms.
 The implement training can be express as 
-<figure markdown>
-  ![The Iterative method SOR and SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png){ width="800" }
-  <figcaption>The implementation of training process</figcaption>
-</figure>
+![SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png)
 
 | math vale      | Description                          |
 | ----------- | ------------------------------------ |
