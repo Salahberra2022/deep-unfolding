@@ -12,9 +12,9 @@ pip install deep_unfolding
 
 ```python
 from deep_unfolding import Iterative
-from iterative import result
+from iterative import main
 list_iterative=['RI', 'SOR', 'GS']
-result(list_iterative)
+main(list_iterative)
 ```
 
   ![Iterative2 (1)](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/c5e53af3-445a-4607-8cec-b9ba33400f26)
@@ -65,7 +65,9 @@ If you use this software, please cite the following reference:
 
 # License
 
-[![GPL License](https://example.com/path/to/gpl_license_image.png)](https://github.com/Salahberra2022/deep_unfolding/blob/main/LICENSE)
+[GPL License](LICENSE)
+
+
 
 
 
