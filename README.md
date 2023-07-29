@@ -12,7 +12,7 @@ pip install deep_unfolding
 
 ```python
 from deep_unfolding import Iterative
-from iterative import main
+from Iterative import main
 list_iterative=['RI', 'SOR', 'GS']
 main(list_iterative)
 ```

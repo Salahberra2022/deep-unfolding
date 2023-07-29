@@ -250,7 +250,7 @@ class SOR(nn.Module):
         n = y.size(1)
         device = y.device
 
-        omega = torch.tensor(1.2)
+        omega = torch.tensor(1.8)
         inv_omega = torch.div(1, omega)
         invM_sor = torch.linalg.inv(D - torch.mul(inv_omega, L))
 
