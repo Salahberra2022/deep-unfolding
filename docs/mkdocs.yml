@@ -3,23 +3,84 @@ repo_url: https://github.com/Salahberra2022/deep_unfolding
 edit_uri: https://github.com/deep_unfolding/edit/master/docs/docs/
 site_description: Documentation for deep unfolding of iterative methods
 site_author: Salah Berra
+<<<<<<< HEAD
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline 
+        name: Switch to dark mode
+      primary: teal
+      accent: purple 
+    - scheme: slate 
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode    
+      primary: teal
+      accent: lime
+  plugins:
+  - search
+  - social
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/Salahberra2022
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/salah-berra-26883113a/
+
+=======
+>>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
 nav:
     - Home: index.md
     - Theory: theory.md
     - Function : function.md
+<<<<<<< HEAD
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+=======
     
 markdown_extensions:
+>>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
   - pymdownx.arithmatex:
       generic: true
   - tables
   - attr_list
   - md_in_html
+<<<<<<< HEAD
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+=======
 
+>>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
 extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
   - javascripts/tablesort.js
+<<<<<<< HEAD
+copyright: |
+  &copy; 2023 <a href="https://github.com/Salahberra2022"  target="_blank" rel="noopener">Salah Berra</a>
+=======
 plugins:
   - glightbox
+>>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac

@@ -25,7 +25,21 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering"
 ]
+<<<<<<< HEAD
+dependencies = [ "numpy >= 1.20" , "torch >= 1.10.1"  ]
+
+[project.optional-dependencies]
+ dev = ["matplotlib",
+ "mkdocs-gallery",
+    "mkdocs-material",
+    "mkdocstrings-python"]
+[project.urls]
+"Bug Reports" = "https://github.com/clugen/pyclugen/issues"
+"Documentation" = "https://clugen.github.io/pyclugen/"
+"Source" = "https://github.com/Salahberra2022/deep_unfolding.git"
+=======
 dependencies = [ "numpy >= 1.20" , "torch >= 1.10.1" ]
+>>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
 
 [tool.setuptools]
 packages = ["deep_unfolding"]
