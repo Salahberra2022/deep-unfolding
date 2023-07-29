@@ -1,12 +1,7 @@
 ## Deep unfolding of iterative method
 
-<<<<<<< HEAD
 The package includes iterative methods for solving linear equations. However, due to the various parameters and performance of the iterative approach, it is necessary to optimize these parameters to improve the convergence rate. Such proposed tool called **deep_unfolding**, which takes an iterative algorithm with a fixed number of iterations T, unravels its structure, and adds trainable parameters. These parameters are then trained using deep learning techniques such as loss functions, stochastic gradient descent, and back-propagation.
 The package contain two different Iterative methods. First package called **Iterative**, which contain the conventional iterative method. The other package called **IterativeNet**, which contain the deep unfolding of iterative method.
-=======
-The package includes iterative methods for solving linear equations. However, due to the various parameters and performance of the iterative approach, it is necessary to optimize these parameters to improve the convergence rate. Such proposed tool called $deep_unfolding$, which takes an iterative algorithm with a fixed number of iterations T, unravels its structure, and adds trainable parameters. These parameters are then trained using deep learning techniques such as loss functions, stochastic gradient descent, and back-propagation.
-The package contain two different Iterative methods. First package called $Iterative$, which contain the conventional iterative method. The other package called $IterativeNet$, which contain the deep unfolding of iterative method.
->>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
 
 ### Installation 
 ```python
@@ -62,7 +57,6 @@ The package includes the following deep unfolded iterative methods:
   <li>RINet</li>
 </ul>
 
-<<<<<<< HEAD
 # Reference
 If you use this software, please cite the following reference:
 
@@ -72,6 +66,4 @@ If you use this software, please cite the following reference:
 
 ![GPL  License](https://github.com/Salahberra2022/deep_unfolding/blob/main/LICENSE)
 
-=======
->>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
 

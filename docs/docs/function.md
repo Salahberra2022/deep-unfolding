@@ -72,11 +72,7 @@ invM = np.linalg.inv(D +L)
     '''
 ```
 ## The conventional SOR with optimum in value
-<<<<<<< HEAD
 ```py
-=======
-```python
->>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
    class SOR(nn.Module):
     '''
     the model of SOR method
@@ -254,7 +250,6 @@ for i in range(total_itr+1):
     norm_list_SOR.append(err)
 ```
 ## The result  
-<<<<<<< HEAD
 ![1 (1)](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/99363b50-9853-49eb-8fc8-6025c7ac4e89)
 
 
@@ -265,11 +260,3 @@ for i in range(total_itr+1):
  
  
 
-=======
-
- ![SOR](https://user-images.githubusercontent.com/119638218/226128899-87742a0f-7b82-4d24-9d78-27104c4d8f86.png)
- 
-![RI](https://user-images.githubusercontent.com/119638218/226128930-f8832bfe-437f-48aa-8e07-37fc5082a15f.png)
-
-![AOR](https://user-images.githubusercontent.com/119638218/226128945-30b1c022-4a15-4182-b078-966408be4167.png)
->>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac

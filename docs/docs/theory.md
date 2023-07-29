@@ -88,11 +88,7 @@ $\gamma^{opt}=\frac{2}{2-\underline{\mu}+\overline{\mu}}$
 
 All of $\underline{\mu}, \overline{\mu}$ can calculated by the iteration matrix of Jacobi as 
 
-<<<<<<< HEAD
 $\mu =\rho(\mathbf{G}_{JA})=\rho(\mathbf{D}^{-1}(\mathbf{D}-\mathbf{A})).$
-=======
-$ \mu =\rho(\mathbf{G}_{JA})=\rho(\mathbf{D}^{-1}(\mathbf{D}-\mathbf{A})).$
->>>>>>> 49129962c65b00396d7c679ff04f60b715fb28ac
 
 finding the spectral radius and eigenvectors can be a challenging task despite optimization efforts because these are intrinsic properties of a matrix and are not directly influenced by its parameters. This requires specialized techniques for their computation, and a high spectral radius can still negatively impact the convergence rate of iterative methods
 
