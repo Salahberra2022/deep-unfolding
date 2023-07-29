@@ -13,25 +13,26 @@ pip install deep_unfolding
 ```python
 from deep_unfolding import Iterative
 from iterative import result
-list_iterative=['RI', 'SOR', 'AOR']
+list_iterative=['RI', 'SOR', 'GS']
 result(list_iterative)
 ```
 
-  ![Iterative](https://user-images.githubusercontent.com/119638218/226128243-a2709a81-ede9-44d7-97d6-9e2081c8b10b.png)
+  ![Iterative2 (1)](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/c5e53af3-445a-4607-8cec-b9ba33400f26)
+
   
 
 ```python
 from deep_unfolding import IterativeNet
 from IterativeNet import main
-list_iterative=['RINet', 'SORNet', 'AORNet']
+list_iterative=['RINet', 'RI', 'SORNet', 'SOR', 'GS']
 main(list_iterative)
 ```
 
- ![IterativeNet](https://user-images.githubusercontent.com/119638218/226128512-9b8187bb-2433-40b3-bf71-510461ab62d5.png)
+ ![Iterative4](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/c53ceec4-458f-44e8-b6cb-72e559b69ffc)
 
 
 
-  ![SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png){
+  ![SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png)
   
 
 # The Rest of package
@@ -64,6 +65,7 @@ If you use this software, please cite the following reference:
 
 # License
 
-![GPL  License](https://github.com/Salahberra2022/deep_unfolding/blob/main/LICENSE)
+[![GPL License](https://example.com/path/to/gpl_license_image.png)](https://github.com/Salahberra2022/deep_unfolding/blob/main/LICENSE)
+
 
 
