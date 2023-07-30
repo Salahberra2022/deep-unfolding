@@ -4,6 +4,7 @@ The package includes iterative methods for solving linear equations. However, du
 The package contain two different Iterative methods. First package called **Iterative**, which contain the conventional iterative method. The other package called **IterativeNet**, which contain the deep unfolding of iterative method.
 
 ### Installation 
+
 ```python
 pip install --upgrade pip
 pip install deep_unfolding
@@ -30,8 +31,9 @@ main(list_iterative)
 <p align="center">
  <img src="https://github.com/Salahberra2022/deep_unfolding/assets/119638218/c53ceec4-458f-44e8-b6cb-72e559b69ffc" width="500" height="400">
  <p>
-
-### The diagram of Deep unfolded network (DUN)
+ 
+ 
+###  The diagram of Deep unfolded network (DUN)
 
 In this exmaple of diagram, it can show that **$\omega_{l}$** can be unfolded throught this network and can got the optimum parameter based on the input of matrix
 
@@ -39,7 +41,6 @@ In this exmaple of diagram, it can show that **$\omega_{l}$** can be unfolded th
 
   
 ### The Rest of package
-
 The package includes several conventional iterative methods for solving the linear equation (**Ax=b**), such as 
 <h4> The iterative methods</h4>
 <ul>
@@ -61,14 +62,6 @@ The package includes the following deep unfolded iterative methods:
   <li>RINet</li>
 </ul>
 
-### Reference
-If you use this software, please cite the following reference:
-
-
-
-### License
-
-[GPL License](LICENSE)
 
 
 
