@@ -33,7 +33,7 @@ main(list_iterative)
 
 ### The diagram of Deep unfodled network (DUN)
 
-In this exmaple of diagram, it can show that \omega can be unfolded throught this network and can got the optimum parameter based on the input of matrix
+In this exmaple of diagram, it can show that $\omega$ can be unfolded throught this network and can got the optimum parameter based on the input of matrix
 
  ![SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png)
 
