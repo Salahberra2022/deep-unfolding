@@ -148,9 +148,9 @@ for gen in (range(itr)): # incremental training
         solution = torch.normal(0.0*torch.ones(bs,n),1.0).to(device)
         y = solution @ H
         x_hat,_ = model_SorNet(gen + 1, bs,y)
-        loss  = loss_func(x_hat, solution)
-        loss.backward()
-        opt1.step()
+        loss  = loss_func(x_hat, solution)  # loss function from right solotion and training one
+        loss.backward()  # backpropagation tool as it can help to find optimal parameters 
+        opt1.step() # optimize function 
         if i % 200 == 0:
             print("generation:",gen+1, " batch:",i, "\t MSE loss:",loss.item() )
     loss_gen.append(loss.item())
@@ -250,11 +250,15 @@ for i in range(total_itr+1):
     norm_list_SOR.append(err)
 ```
 ## The result  
-![1 (1)](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/99363b50-9853-49eb-8fc8-6025c7ac4e89)
 
-
+<p align="center">
+   <img src="https://github.com/Salahberra2022/deep_unfolding/assets/119638218/99363b50-9853-49eb-8fc8-6025c7ac4e89" width="500" height="400">
+ <p>
  
-![Iterative2](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/f4298178-99b4-4af5-8295-e813a0d7f9bf)
+ <p align="center">
+   <img src="https://github.com/Salahberra2022/deep_unfolding/assets/119638218/f4298178-99b4-4af5-8295-e813a0d7f9bf" width="500" height="400">
+ <p>
+
 
 
 
