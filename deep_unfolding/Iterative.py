@@ -21,7 +21,7 @@ def main(list_iterative):
         list_iterative (list): List of iterative methods.
 
     """
-    from methods import itr_list, norm_list_GS, norm_list_RI, norm_list_Jacobi, norm_list_SOR, norm_list_AOR, norm_list_AOR_CHEBY, norm_list_SOR_CHEBY
+    from .methods import itr_list, norm_list_GS, norm_list_RI, norm_list_Jacobi, norm_list_SOR, norm_list_AOR, norm_list_AOR_CHEBY, norm_list_SOR_CHEBY
 
     norm_list = np.zeros((len(list_iterative), len(itr_list)))
 
@@ -50,5 +50,3 @@ def main(list_iterative):
     plt.yscale('log')
     plt.legend()
     plt.show()
-
-
