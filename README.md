@@ -11,8 +11,7 @@ pip install deep_unfolding
 ### Quick start
 
 ```python
-from deep_unfolding import Iterative
-from Iterative import main
+from deep_unfolding.Iterative import main
 list_iterative=['RI', 'SOR', 'GS']
 main(list_iterative)
 ```
@@ -21,8 +20,7 @@ main(list_iterative)
  <p>
  
 ```python
-from deep_unfolding import IterativeNet
-from IterativeNet import main
+from deep_unfolding.IterativeNet import main
 list_iterative=['RINet', 'RI', 'SORNet', 'SOR', 'GS']
 main(list_iterative)
 ```
