@@ -31,9 +31,10 @@ main(list_iterative)
 
 ### The diagram of the Deep unfolded network (DUN)
 
-In this example of the diagram, it can show that **$\omega_{l}$** can be unfolded throughout this network and can be got the optimum parameter based on the input of the matrix.
+In this example of the diagram, it can show that **$\omega_{l}$** can be unfolded throughout this network and can be the optimum parameter based on the input of the matrix.
 
- ![SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png)
+![sorNet](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/d6d6af2b-89a6-4414-82af-2861e68c69a2)
+
 
   
 ### The Rest of package
