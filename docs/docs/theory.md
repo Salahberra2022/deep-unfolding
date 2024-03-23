@@ -20,7 +20,7 @@ $\mathbf{A}=\mathbf{D}-\mathbf{U}-\mathbf{L}.$
 | $\mathbf{U}$| upper triangular matrix |
 | $\mathbf{L}$| lower triangular matrix |
 
-to solve $\mathbf{x}$ from the equation above, it can solve in an iteratively way.
+to solve $\mathbf{x}$ from the equation above, it can be solved in an iteratively way.
 The accelerated over-relaxation AOR: 
 
  $\mathbf{x}^{(n+1)}=(\mathbf{D}-\beta\mathbf{L})^{-1}((1-\alpha)\mathbf{D}+(\alpha-\beta)\mathbf{L}+\alpha \mathbf{U})  \mathbf{x}^{(n)} \\ +(\mathbf{D}-\beta\mathbf{L})^{-1}\alpha\mathbf{b}.$
@@ -29,7 +29,7 @@ The successive over-relaxation SOR:
 
 $\mathbf{x}^{(n+1)}=(\mathbf{D}-\omega\mathbf{L})^{-1}((1-\omega)\mathbf{D}+\omega \mathbf{U})\mathbf{x}^{(n)}+(\mathbf{D}-\omega\mathbf{L})^{-1}\mathbf{b}.$ 
 
-The Gauss–Seidal (GS): 
+The Gauss–Seidel (GS): 
 
 $\mathbf{x}^{(n+1)}=(\mathbf{D}-\mathbf{L})^{-1}\mathbf{U}\mathbf{x}^{(n)}+\mathbf{U}\mathbf{b}.$
 
@@ -41,7 +41,7 @@ The Richardson iteration (RI):
 
 $\mathbf{x}^{(n+1)}=(\mathbf{I}-\omega \mathbf{A})\mathbf{x}^{(n)}+\omega\mathbf{b}.$
 
- To further accelerate these methods, we propose another technique called Chebyshev acceleration method to enhance the convergence rate. The Chebyshev acceleration method can be expressed as:
+ To further accelerate these methods, we propose another technique called the Chebyshev acceleration method to enhance the convergence rate. The Chebyshev acceleration method can be expressed as:
 
  $\mathbf{y}^{(n+1)} = p_{n+1}\Big(\gamma (\mathbf{x}^{(n+1)} - \mathbf{y}^{(n)}) + (\mathbf{y}^{(n)}-\mathbf{y}^{(n-1)}) \Big)  + \mathbf{y}^{(n-1)}.$
 
@@ -55,7 +55,7 @@ $\mathbf{x}^{(n+1)}=(\mathbf{I}-\omega \mathbf{A})\mathbf{x}^{(n)}+\omega\mathbf
 
 # Mathematical optimization of parameters
 
-The iterative method can be rewrite as different form as 
+The iterative method can be rewritten in different forms as 
 
 $\mathbf{x}^{(n+1)}=\mathbf{x}^{(n)}\mathbf{G}+\mathbf{c}.$
 
@@ -66,7 +66,7 @@ $\mathbf{x}^{(n+1)}=\mathbf{x}^{(n)}\mathbf{G}+\mathbf{c}.$
 | $\underline{\mu}$| The minimum of spectral radius |
 | $\mathbf{G}$| The iteration matrix |
 
-The paramters of iterative emthods has been optmized.
+The parameters of iterative methods have been optimized.
 The SOR parameter $\omega^{opt}$:
 
 $\omega^{opt}=\frac{2}{1+\sqrt{1-\overline{\mu}^{2}}}$
@@ -96,7 +96,7 @@ finding the spectral radius and eigenvectors can be a challenging task despite o
 
 A deep learning techniques such as the deep unfolding network can be used to address the challenge of finding optimization parameters without the need for difficult calculations of spectral radius and eigenvectors. This approach has shown promising results and can accelerate the iterative process used to solve linear systems, leading to faster convergence rates.
 
-deep unfolding , which takes an iterative algorithm with a fixed number of iterations T, unravels its structure, and adds trainable parameters. These parameters are then trained using deep learning techniques such as loss functions, stochastic gradient descent, and back propagation.
+Deep unfolding takes an iterative algorithm with a fixed number of iterations T, unravels its structure, and adds trainable parameters. These parameters are then trained using deep learning techniques such as loss functions, stochastic gradient descent, and backpropagation.
 
 The deep unfolding of the iterative algorithm  as follows:
 <ul>
@@ -110,9 +110,10 @@ For example SORNet as
 
 $\mathbf{x}^{(t+1)}=(\mathbf{D}-\omega_{t}\mathbf{L})^{-1}((1-\omega_{t})\mathbf{D}+\omega_{t} \mathbf{U})\mathbf{x}^{(t)}+(\mathbf{D}-\omega_{t}\mathbf{L})^{-1}\mathbf{b}.$ 
 
-here $t$ is the number of training. The trainable internal parameters, such as $\omega_{t}$ parameter, can be optimized with standard deep learning techniques, i.e., the back propagation and stochastic gradient descent algorithms.
-The implement training can be express as 
-![SORNet](https://user-images.githubusercontent.com/119638218/226128700-f03ae894-a69b-48b1-a4bf-a0a3d2820d8e.png)
+where $t$ is the number of training. The trainable internal parameters, such as $\omega_{t}$ parameter, can be optimized with standard deep learning techniques, i.e., the backpropagation and stochastic gradient descent algorithms.
+The implementation training can be expressed as 
+![sorNet](https://github.com/Salahberra2022/deep_unfolding/assets/119638218/d6d6af2b-89a6-4414-82af-2861e68c69a2)
+
 
 | math vale      | Description                          |
 | ----------- | ------------------------------------ |
