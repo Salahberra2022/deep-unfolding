@@ -3,55 +3,77 @@
 # at https://www.gnu.org/licenses/)
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
 import math
-import matplotlib.pyplot as plt
-device = torch.device('cpu') # 'cpu' or 'cuda'
-# Model parameters
-itr = 25  # Iteration steps T
-total_itr = itr  # Max iterations # ?
-n = 300  # Size of matrix (rows)
-m = 600  # Size of matrix (columns)
 
-# Parameters for evaluation of generalization error
-total_itr = 25  # Total number of iterations (multiple of "itr")
-bs = 10  # Number of samples
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU, if not CPU
+print(f"Code run on : {device}")
 
-# Generate A and H
-seed_ = 12
-np.random.seed(seed=seed_)
-H = np.random.normal(0, 1.0 / math.sqrt(n), (n, m))
-A = np.dot(H, H.T)
-eig = np.linalg.eig(A)
-eig = eig[0]  # Eigenvalues
+def generate_A_H_sol(n:int=300,m:int=600, seed:int=12, bs:int=10) : 
+    """Generate A and H
 
-# Convert to Torch tensors and move to device
-W = torch.Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
-H = torch.from_numpy(H).float().to(device)  # Define the appropriate 'device'
+    Args:
+        n (int, optional): Number of rows. Defaults to 300.
+        m (int, optional): Number of columns. Defaults to 600.
+        seed (int, optional): Seed for random. Defaults to 12.
 
-# Decmposed matrix calculations
-D = np.diag(np.diag(A)) # diagonal matrix
-L = np.tril(A, -1) #  lower triangular matrix
-U = np.triu(A, 1) # upper triangular matrix
-Dinv = np.linalg.inv(D) # inversion diagonal matrix
-invM = np.linalg.inv(D + L) #  inversion matrix M
-# Convert to Torch tensors and move to device
-A = torch.Tensor(A).to(device)  # Define the appropriate 'device'
-D = torch.Tensor(D).to(device)  # Define the appropriate 'device'
-L = torch.Tensor(L).to(device)  # Define the appropriate 'device'
-U = torch.Tensor(U).to(device)  # Define the appropriate 'device'
-Dinv = torch.Tensor(Dinv).to(device)  # Define the appropriate 'device'
-invM = torch.Tensor(invM).to(device)  # Define the appropriate 'device'
+    Returns:
+        A, H, W: Matrix A (square matrix), matrix H (random matrix), Matrix with diagonal : eigen values of A
+    """
+    np.random.seed(seed=seed)
+    H = np.random.normal(0, 1.0 / math.sqrt(n), (n, m))
+    A = np.dot(H, H.T)
+    eig = np.linalg.eig(A)[0] # Eigenvalues
+    
+    W = torch.Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
+    H = torch.from_numpy(H).float().to(device)  # Define the appropriate 'device'
+    
+    print("Condition number, min. and max. eigenvalues of A:")
+    print(np.max(eig) / np.min(eig), np.max(eig), np.min(eig))
+    
+    solution = torch.normal(torch.zeros(bs,n),1.0).to(device).detach()
+    y = solution@H.detach()
+    
+    return A,H, W, solution, y
 
-# Print condition number, minimum, and maximum eigenvalues of A
-print("Condition number, min. and max. eigenvalues of A:")
-print(np.max(eig) / np.min(eig), np.max(eig), np.min(eig))
+def decompose_matrix(A:np.array) : 
+    # Decmposed matrix calculations
+    D = np.diag(np.diag(A)) # diagonal matrix
+    L = np.tril(A, -1) #  lower triangular matrix
+    U = np.triu(A, 1) # upper triangular matrix
+    Dinv = np.linalg.inv(D) # inversion diagonal matrix
+    invM = np.linalg.inv(D + L) #  inversion matrix M
+    # Convert to Torch tensors and move to device
+    A = torch.Tensor(A).to(device) 
+    D = torch.Tensor(D).to(device) 
+    L = torch.Tensor(L).to(device) 
+    U = torch.Tensor(U).to(device) 
+    Dinv = torch.Tensor(Dinv).to(device) 
+    Minv = torch.Tensor(invM).to(device) 
+    
+    return A, D, L, U, Dinv, Minv
 
+def model_iterations(total_itr:int, n:int, bs:int, model, solution) : 
+    norm_list_model = [] # Initialize the iteration list
+    s_hats = []
+    for i in range(total_itr+1):
+        s_hat, _ = model.iterate(i)
+        err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
+        
+        s_hats.append(s_hat)
+        norm_list_model.append(err)
+    return s_hats, norm_list_model
 
-    ## naive GS with a constant step size 
-class GS(nn.Module):
+class base_model() : 
+    def __init__(self, n, A, H, bs, y) : 
+        
+        self.n = n
+        self.H = H
+        self.bs = bs
+        self.y = y
+        
+        self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(A)
+
+class GS(base_model):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system.
 
     Args:
@@ -65,15 +87,16 @@ class GS(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y):
         """Initialize the Gauss-Seidel solver.
 
         Args:
             num_itr (int): The number of Gauss-Seidel iterations to perform.
 
         """
-        super(GS, self).__init__()
-    def forward(self, num_itr, bs, y):
+        super(GS, self).__init__(n, A, H, bs, y)
+        
+    def iterate(self, num_itr):
         """Perform the Gauss-Seidel iterations and return the final solution.
 
         Args:
@@ -87,22 +110,21 @@ class GS(nn.Module):
 
         """
         traj = []
-        s = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for i in range(num_itr):
-            temp = -torch.matmul(s, U) + yMF
-            s = torch.matmul(temp, invM)
+            temp = -torch.matmul(s, self.U) + yMF
+            s = torch.matmul(temp, self.Minv)
             traj.append(s)
 
         return s, traj
 
-gs_model = GS(itr).to(device)
-## naive RI with a constant step size 
-class RI(nn.Module):
+
+class RI(base_model):
     """Class implementing the Richardson iteration algorithm for solving a linear system.
 
     Args:
@@ -116,17 +138,16 @@ class RI(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y):
         """Initialize the Richardson iteration solver.
 
         Args:
             num_itr (int): The number of Richardson iterations to perform.
 
         """
-        super(RI, self).__init__()
-        
+        super(RI, self).__init__(n, A, H, bs, y)
 
-    def forward(self, num_itr, bs, y):
+    def iterate(self, num_itr):
         """Perform the Richardson iterations and return the final solution.
 
         Args:
@@ -141,23 +162,19 @@ class RI(nn.Module):
         """
         traj = []
         omega = torch.tensor(0.25)
-        s = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for i in range(num_itr):
-            s = s + torch.mul(omega, (yMF - torch.matmul(s, A)))
+            s = s + torch.mul(omega, (yMF - torch.matmul(s, self.A)))
             traj.append(s)
 
         return s, traj
 
-
-ri_model = RI(itr).to(device)
-## naive Jacobi with a constant step size 
-
-class Jacobi(nn.Module):
+class Jacobi(base_model):
     """Class implementing the Jacobi iteration algorithm for solving a linear system.
 
     Args:
@@ -171,16 +188,17 @@ class Jacobi(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y, omega:float=0.2):
         """Initialize the Jacobi iteration solver.
 
         Args:
             num_itr (int): The number of Jacobi iterations to perform.
 
         """
-        super(Jacobi, self).__init__()
-     
-    def forward(self, num_itr, bs, y):
+        super(Jacobi, self).__init__(n, A, H, bs, y)
+        self.omega = torch.tensor(omega)
+        
+    def iterate(self, num_itr):
         """Perform the Jacobi iterations and return the final solution.
 
         Args:
@@ -194,24 +212,20 @@ class Jacobi(nn.Module):
 
         """
         traj = []
-        omega = torch.tensor(0.2)
-        s = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for i in range(num_itr):
-            temp = torch.matmul(Dinv, (D - A))
-            s = torch.matmul(s, temp) + torch.matmul(yMF, Dinv)
+            temp = torch.matmul(self.Dinv, (self.D - self.A))
+            s = torch.matmul(s, temp) + torch.matmul(yMF, self.Dinv)
             traj.append(s)
 
         return s, traj
 
-
-Jacobi_model = Jacobi(itr).to(device)
-## naive SOR with a constant step size 
-class SOR(nn.Module):
+class SOR(base_model):
     """Class implementing the Successive Over-Relaxation (SOR) algorithm for solving a linear system.
 
     Args:
@@ -225,15 +239,17 @@ class SOR(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y, omega:float=1.8):
         """Initialize the SOR solver.
 
         Args:
             num_itr (int): The number of SOR iterations to perform.
 
         """
-        super(SOR, self).__init__()
-    def forward(self, num_itr, bs, y):
+        super(SOR, self).__init__(n, A, H, bs, y)
+        self.omega = torch.tensor(omega)
+        
+    def iterate(self, num_itr):
         """Perform the SOR iterations and return the final solution.
 
         Args:
@@ -247,30 +263,25 @@ class SOR(nn.Module):
 
         """
         traj = []
-        n = y.size(1)
-        device = y.device
+        n = self.y.size(1)
 
-        omega = torch.tensor(1.8)
-        inv_omega = torch.div(1, omega)
-        invM_sor = torch.linalg.inv(D - torch.mul(inv_omega, L))
+        inv_omega = torch.div(1, self.omega)
+        invM_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
 
-        s = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
-
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
+        
         for i in range(num_itr):
-            temp = torch.mul((inv_omega - 1), D) + torch.mul(inv_omega, U)
+            temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
             s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(yMF, invM_sor)
             traj.append(s)
 
         return s, traj
 
-
-sor_model = SOR(itr).to(device)
-
-class SOR_CHEBY(nn.Module):
+class SOR_CHEBY(base_model):
     """Class implementing the SOR-Chebyshev algorithm for solving a linear system.
 
     Args:
@@ -284,17 +295,19 @@ class SOR_CHEBY(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y, omega:float=1.8, omegaa:float=0.8, gamma:float=0.8):
         """Initialize the SOR-Chebyshev solver.
 
         Args:
             num_itr (int): The number of SOR-Chebyshev iterations to perform.
 
         """
-        super(SOR_CHEBY, self).__init__()
-       
+        super(SOR_CHEBY, self).__init__(n, A, H, bs, y)
+        self.omega = torch.tensor(omega)
+        self.omegaa = torch.tensor(omegaa)
+        self.gamma = torch.tensor(gamma)
 
-    def forward(self, num_itr, bs, y):
+    def iterate(self, num_itr):
         """Perform the SOR-Chebyshev iterations and return the final solution.
 
         Args:
@@ -308,28 +321,25 @@ class SOR_CHEBY(nn.Module):
 
         """
         traj = []
-       
-        omega = torch.tensor(1.8)
-        inv_omega = torch.div(1, omega)
-        invM_sor = torch.linalg.inv(D - torch.mul(inv_omega, L))
+        
+        inv_omega = torch.div(1, self.omega)
+        invM_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
 
-        s = torch.zeros(bs, n).to(device)
-        s_new = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, self.n).to(device)
+        s_new = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
-        omegaa = torch.tensor(0.8)
-        gamma = torch.tensor(0.8)
         s_present = s
         s_old = torch.zeros(s_present.shape).to(device)
 
         for i in range(num_itr):
-            temp = torch.mul((inv_omega - 1), D) + torch.mul((inv_omega), U)
+            temp = torch.mul((inv_omega - 1), self.D) + torch.mul((inv_omega), self.U)
             s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(yMF, invM_sor)
 
-            s_new = omegaa * (gamma * (s - s_present) + (s_present - s_old)) + s_old
+            s_new = self.omegaa * (self.gamma * (s - s_present) + (s_present - s_old)) + s_old
             s_old = s
             s_present = s_new
 
@@ -337,11 +347,7 @@ class SOR_CHEBY(nn.Module):
 
         return s_new, traj
 
-
-sor_cheby_model = SOR_CHEBY(itr).to(device)
-
-## naive AOR with a constant step size 
-class AOR(nn.Module):
+class AOR(base_model):
     """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for solving a linear system.
 
     Args:
@@ -355,16 +361,18 @@ class AOR(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y, omega:float=0.3, r:float=0.2):
         """Initialize the AOR solver.
 
         Args:
             num_itr (int): The number of AOR iterations to perform.
 
         """
-        super(AOR, self).__init__()
-     
-    def forward(self, num_itr, bs, y):
+        super(AOR, self).__init__(n, A, H, bs, y)
+        self.omega = torch.tensor(omega)
+        self.r = torch.tensor(r)
+
+    def iterate(self, num_itr):
         """Perform the AOR iterations and return the final solution.
 
         Args:
@@ -378,32 +386,24 @@ class AOR(nn.Module):
 
         """
         traj = []
-       
 
-        r = torch.tensor(0.2)  # Acceleration parameter
-        omega = torch.tensor(0.3)  # Over-relaxation parameter
-        inv_omega = torch.div(1, omega)
-        M = (D - torch.mul(r, L))
+        M = (self.D - torch.mul(self.r, self.L))
         invM_aor = torch.linalg.inv(M)
-        N = (torch.mul((1 - omega), D) + torch.mul((omega - r), L) + torch.mul(omega, U))
+        N = (torch.mul((1 - self.omega), self.D) + torch.mul((self.omega - self.r), self.L) + torch.mul(self.omega, self.U))
 
-        s = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for i in range(num_itr):
-            s = torch.matmul(s, torch.matmul(invM_aor, N)) + torch.mul(omega, torch.matmul(yMF, invM_aor))
+            s = torch.matmul(s, torch.matmul(invM_aor, N)) + torch.mul(self.omega, torch.matmul(yMF, invM_aor))
             traj.append(s)
 
         return s, traj
 
-
-aor_model = AOR(itr).to(device)
-
-## naive AOR_CHEBY with a constant step size 
-class AOR_CHEBY(nn.Module):
+class AOR_CHEBY(base_model):
     """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev acceleration algorithm for solving a linear system.
 
     Args:
@@ -417,17 +417,19 @@ class AOR_CHEBY(nn.Module):
 
     """
 
-    def __init__(self, num_itr):
+    def __init__(self, n, A, H, bs, y, omega:float=0.1, r:float=0.1):
         """Initialize the AOR-Chebyshev solver.
 
         Args:
             num_itr (int): The number of AOR-Chebyshev iterations to perform.
 
         """
-        super(AOR_CHEBY, self).__init__()
+        super(AOR_CHEBY, self).__init__(n, A, H, bs, y)
+        self.omega = torch.tensor(omega)
+        self.r = torch.tensor(r)
         
 
-    def forward(self, num_itr, bs, y):
+    def iterate(self, num_itr):
         """Perform the AOR-Chebyshev iterations and return the final solution.
 
         Args:
@@ -442,27 +444,23 @@ class AOR_CHEBY(nn.Module):
         """
         traj = []
         
-
-        r = torch.tensor(0.1)  # Acceleration parameter
-        omega = torch.tensor(0.1)  # Over-relaxation parameter
-        s = torch.zeros(bs, n).to(device)
+        s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
-        yMF = torch.matmul(y, H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         Y0 = s
-        X0 = s
 
-        M = (D - torch.mul(r, L))
+        M = (self.D - torch.mul(self.r, self.L))
         invM = torch.linalg.inv(M)
-        N = (torch.mul((1 - omega), D) + torch.mul((omega - r), L) + torch.mul(omega, U))
+        N = (torch.mul((1 - self.omega), self.D) + torch.mul((self.omega - self.r), self.L) + torch.mul(self.omega, self.U))
         temp = torch.matmul(invM, N)
 
         rho = torch.tensor(0.1)
         mu0 = torch.tensor(1)
         mu1 = rho
-        xhat1 = torch.matmul(s, temp) + omega * torch.matmul(yMF, invM)
+        xhat1 = torch.matmul(s, temp) + self.omega * torch.matmul(yMF, invM)
         Y1 = xhat1
         Y = Y1
 
@@ -481,58 +479,3 @@ class AOR_CHEBY(nn.Module):
             traj.append(Y)
 
         return Y, traj
-
-
-aor_cheby_model = AOR_CHEBY(itr).to(device)
-
-solution = torch.normal(0.0*torch.ones(bs,n),1.0).to(device).detach()
-y = solution@H.detach()
-
-itr_list = []
-## naive GS 
-norm_list_GS = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = gs_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_GS.append(err)
-    itr_list.append(i)
-    ## naive RI 
-norm_list_RI = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = ri_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_RI.append(err)
-    #itr_list.append(i)
-norm_list_Jacobi = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = Jacobi_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_Jacobi.append(err)
-    #itr_list.append(i)
-
-## naive SOR 
-norm_list_SOR = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = sor_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_SOR.append(err)
-
-## naive SOR_CHEBY 
-norm_list_SOR_CHEBY = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = sor_cheby_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_SOR_CHEBY.append(err)
-
-
-## naive AOR 
-norm_list_AOR = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = aor_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_AOR.append(err)
-norm_list_AOR_CHEBY = [] # Initialize the iteration list
-for i in range(total_itr+1):
-    s_hat, _ = aor_cheby_model(i, bs,y)
-    err = (torch.norm(solution.to(device) - s_hat.to(device))**2).item()/(n*bs)
-    norm_list_AOR_CHEBY.append(err)
