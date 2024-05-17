@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 device = torch.device('cpu') # 'cpu' or 'cuda'
 # Model parameters
 itr = 25  # Iteration steps T
-total_itr = itr  # Max iterations
+total_itr = itr  # Max iterations # ?
 n = 300  # Size of matrix (rows)
 m = 600  # Size of matrix (columns)
 

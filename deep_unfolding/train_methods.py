@@ -14,10 +14,10 @@ device = torch.device('cpu') # 'cpu' or 'cuda'
 # Model parameters
 itr = 25  # Iteration steps T
 total_itr = itr  # Max iterations
-n = 300  # Number of rows
-m = 600  # Number of columns
+n = 300  # Number of rows # ? suppose to be a variable ?
+m = 600  # Number of columns # ? suppose to be a variable ?
 
-# Training parameters
+# Training parameters # ? suppose to be variables ?
 bs = 200  # Mini-batch size
 num_batch = 500  # Number of mini-batches
 lr_adam = 0.002  # Learning rate of optimizer
