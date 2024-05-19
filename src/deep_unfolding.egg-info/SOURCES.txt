@@ -1,0 +1,12 @@
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+setup.cfg
+src/deep_unfolding.egg-info/PKG-INFO
+src/deep_unfolding.egg-info/SOURCES.txt
+src/deep_unfolding.egg-info/dependency_links.txt
+src/deep_unfolding.egg-info/requires.txt
+src/deep_unfolding.egg-info/top_level.txt
+tests/testNet.py
+tests/test_iterative.py
