@@ -11,6 +11,7 @@ __email__ = "."
 __status__ = "dev"
 
 # Note that each Alghorithm import from method module and run in the main code Iterative.
-from .methods import *
+from .methods import device, generate_A_H_sol, decompose_matrix
+from .utils import model_iterations, GS, RI, Jacobi, SOR, SOR_CHEBY, AOR, AOR_CHEBY
 # Note that each Alghorithm import from train_method module and run in the main code IterativeNet.
 #from train_methods import itr_list, norm_list_SorNet, norm_list_Sor_Cheby_Net, norm_list_AorNet, norm_list_rinet
