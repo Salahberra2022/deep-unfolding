@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
-Name: deep-unfolding
-Version: 0.4.1
+Name: deep_unfolding
+Version: 0.5.0
 Summary: deep unfolding of iterative methods to solve linear equations
 Home-page: https://github.com/Salahberra2022/deep_unfolding
 Author: Salah Berra
@@ -16,6 +16,8 @@ Classifier: Topic :: Scientific/Engineering
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: numpy>=1.26.4
+Requires-Dist: torch>=2.3.0
 
 ## Deep unfolding of iterative method
 
@@ -28,7 +30,11 @@ pip install --upgrade pip
 pip install deep_unfolding
 ```
 ### Quick start
+```python
+from deep_unfolding.train_methods import SORNet 
 
+model = SORNet()
+```
 ### The diagram of the Deep unfolded network (DUN)
 
 

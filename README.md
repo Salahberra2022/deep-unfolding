@@ -6,10 +6,14 @@ The package contains two different Iterative methods. The first package is calle
 ### Installation 
 ```python
 pip install --upgrade pip
-pip install deep_unfolding
+pip install deep-unfolding
 ```
 ### Quick start
+```python
+from deep_unfolding.train_methods import SORNet 
 
+model = SORNet()
+```
 ### The diagram of the Deep unfolded network (DUN)
 
 
