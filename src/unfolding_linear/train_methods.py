@@ -1,4 +1,4 @@
-from utils import device, decompose_matrix
+from .utils import device, decompose_matrix
 import torch
 import torch.nn as nn
 from typing import Tuple, List

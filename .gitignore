@@ -1,2 +1,48 @@
-*/__pycache__/
+# website
 */site
+
+# token
+pypi_*
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Compiled source code
+*.pyc
+*.pyo
+__pycache__/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# IDE Specific environement
+.vscode/
+.idea/

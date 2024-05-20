@@ -5,7 +5,7 @@
 import torch
 import numpy as np
 from typing import List, Tuple
-from utils import device, decompose_matrix
+from .utils import device, decompose_matrix
 
 def model_iterations(total_itr: int, n: int, bs: int, model, solution: torch.Tensor) -> Tuple[List[torch.Tensor], List[float]]:
     """
