@@ -3,6 +3,7 @@ MANIFEST.in
 README.md
 pyproject.toml
 setup.cfg
+setup.py
 src/deep_unfolding.egg-info/PKG-INFO
 src/deep_unfolding.egg-info/SOURCES.txt
 src/deep_unfolding.egg-info/dependency_links.txt
