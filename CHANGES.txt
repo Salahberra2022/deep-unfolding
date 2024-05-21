@@ -1,0 +1,15 @@
+[V0.2.0]
+- Added V1 of the documentation website of the project
+- Added default values for all trainable models 
+- In progress
+[V0.1.0]
+- Set up the initial version of the package
+- Implementing some conventional approaches to approximate the solution of linear equations : 
+    - Gauss-Seidel (GS) algorithm
+    - Richardson iteration algorithm
+    - Jacobi iteration (RI) algorithm
+    - Successive Over-Relaxation (SOR) algorithm
+    - Successive Over-Relaxation (SOR) with Chebyshev acceleration algorithm
+    - Accelerated Over-Relaxation (AOR) algorithm
+    - Accelerated Over-Relaxation (AOR) with Chebyshev acceleration algorithm
+- Added some tutorials to use the package : the methods and train_methods submodules
