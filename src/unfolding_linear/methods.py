@@ -569,6 +569,7 @@ class AOR_CHEBY(base_model):
         Initialize the AOR-Chebyshev solver.
 
         Args:
+        
             - n (int): Dimension of the solution.
             - A (np.ndarray): Input square matrix to decompose.
             - H (torch.Tensor): Random matrix H.
