@@ -99,7 +99,7 @@ class SORNet(nn.Module):
             Perform forward pass of the SORNet model.
     """
 
-    def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor,    init_val_SORNet:float=1.1, device: torch.device = device):
+    def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_SORNet:float=1.1, device: torch.device = device):
         """
         Initialize the SORNet model.
 
