@@ -28,7 +28,7 @@ A, H, W, solution, y = generate_A_H_sol(n=n, m=m, seed=seed, bs=bs)
 loss_func = nn.MSELoss()
 
 # Model
-model_SorNet = SORNet(init_val_SORNet, A, H, bs, y, device=device)
+model_SorNet = SORNet(A, H, bs, y, init_val_SORNet, device=device)
 # Optimizer
 opt_SORNet = optim.Adam(model_SorNet.parameters(), lr=lr_adam)
 

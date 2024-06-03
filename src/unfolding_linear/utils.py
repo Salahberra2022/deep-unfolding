@@ -38,8 +38,10 @@ def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, d
     W = torch.Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
     H = torch.from_numpy(H).float().to(device)  # Define the appropriate 'device'
     
-    print("Condition number, min. and max. eigenvalues of A:")
-    print(np.max(eig) / np.min(eig), np.max(eig), np.min(eig))
+    print(f"""
+    - Condition number of A: {np.max(eig) / np.min(eig)} 
+    - Min eigenvalue of A: {np.min(eig)}
+    - Max eigenvalue of A: {np.max(eig)}""")
     
     solution = torch.normal(torch.zeros(bs, n), 1.0).to(device).detach()
     y = solution @ H.detach()
