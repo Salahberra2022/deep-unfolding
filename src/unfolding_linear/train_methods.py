@@ -142,7 +142,7 @@ class SORNet(nn.Module):
         traj = []
 
         invM = torch.linalg.inv(self.inv_omega * self.D + self.L)
-        s = torch.zeros(self.bs, self.H.size(1), device=self.device)
+        s = torch.zeros(self.bs, self.H.size(0), device=self.device)
         traj.append(s)
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
@@ -235,8 +235,8 @@ class SOR_CHEBY_Net(nn.Module):
         traj = []
 
         invM = torch.linalg.inv(self.inv_omega * self.D + self.L)
-        s = torch.zeros(self.bs, self.H.size(1), device=self.device)
-        s_new = torch.zeros(self.bs, self.H.size(1), device=self.device)
+        s = torch.zeros(self.bs, self.H.size(0), device=self.device) # modif to size(0)
+        s_new = torch.zeros(self.bs, self.H.size(0), device=self.device) # modif to size(0)
         traj.append(s)
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
@@ -331,7 +331,7 @@ class AORNet(nn.Module):
 
         invM = torch.linalg.inv(self.L - self.r * self.D)
         N = (1 - self.omega) * self.D + (self.omega - self.r) * self.L + self.omega * self.U
-        s = torch.zeros(self.bs, self.H.size(1), device=self.device)
+        s = torch.zeros(self.bs, self.H.size(0), device=self.device) # change to size(0)
         traj.append(s)
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
@@ -384,6 +384,7 @@ class RINet(nn.Module):
 
         """
         super(RINet, self).__init__()
+        self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_RINet, device=device))
 
         A, D, L, U, _, _ = decompose_matrix(A)
