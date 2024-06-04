@@ -4,7 +4,7 @@ import pytest
 import torch
 import numpy as np
 from unfolding_linear.methods import model_iterations, base_model, GS, RI, Jacobi, SOR, SOR_CHEBY, AOR, AOR_CHEBY
-from unfolding_linear.utils import device, decompose_matrix  # Assurez-vous que les utilitaires nécessaires sont importés correctement
+from unfolding_linear.utils import device, decompose_matrix  
 
 @pytest.fixture
 def generate_matrices():
@@ -22,6 +22,7 @@ def generate_solution():
     n = 300
     return torch.from_numpy(np.random.rand(bs, n)).float().to(device)
 
+################## Model iterations ##################
 def test_model_iterations(generate_matrices, generate_solution):
     n, _, _, bs, _ = generate_matrices
     solution = generate_solution
@@ -38,6 +39,7 @@ def test_model_iterations(generate_matrices, generate_solution):
     for norm in norm_list_model:
         assert isinstance(norm, float), "Each element in norm_list_model should be a float"
 
+################## Base model ##################
 def test_base_model_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     model = base_model(n, A, H, bs, y)
@@ -55,6 +57,7 @@ def test_base_model_initialization(generate_matrices):
     assert torch.allclose(model.Dinv, Dinv), "Attribute Dinv should match the decomposed matrix"
     assert torch.allclose(model.Minv, Minv), "Attribute Minv should match the decomposed matrix"
 
+################## GS ##################
 def test_GS_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     gs_model = GS(n, A, H, bs, y)
@@ -82,6 +85,7 @@ def test_GS_iterate(generate_matrices):
     assert traj[0].shape == (bs, n), "Each element in the trajectory should have shape (bs, n)"
     assert s.shape == (bs, n), "Final solution tensor should have shape (bs, n)"
 
+################## RI ##################
 def test_RI_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     ri_model = RI(n, A, H, bs, y)
@@ -107,6 +111,7 @@ def test_RI_iteration(generate_matrices):
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
 
+################## Jacobi ##################
 def test_Jacobi_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     jacobi_model = Jacobi(n, A, H, bs, y, omega=0.2)
@@ -133,6 +138,7 @@ def test_Jacobi_iteration(generate_matrices):
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
 
+################## SOR ##################
 def test_SOR_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     sor_model = SOR(n, A, H, bs, y, omega=1.8)
@@ -159,6 +165,7 @@ def test_SOR_iteration(generate_matrices):
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
 
+################## SOR Cheby ##################
 def test_SOR_CHEBY_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     sor_cheby_model = SOR_CHEBY(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
@@ -187,6 +194,7 @@ def test_SOR_CHEBY_iteration(generate_matrices):
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
 
+################## AOR ##################
 def test_AOR_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     aor_model = AOR(n, A, H, bs, y, omega=0.3, r=0.2)
@@ -214,6 +222,7 @@ def test_AOR_iteration(generate_matrices):
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
 
+################## AOR Cheby ##################
 def test_AOR_CHEBY_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     aor_cheby_model = AOR_CHEBY(n, A, H, bs, y, omega=0.1, r=0.1)

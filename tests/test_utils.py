@@ -9,9 +9,8 @@ def generate_data():
     m = 600
     seed = 12
     bs = 10
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Vous pouvez aussi tester sur GPU si disponible
-
-    # Appeler la fonction
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # You can also test on GPU if available
+    
     return generate_A_H_sol(n, m, seed, bs, device)
 
 def test_A_shape(generate_data):
