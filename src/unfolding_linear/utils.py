@@ -14,8 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU, if 
 print(f"Code run on : {device}")
 
 def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, device: torch.device = device) -> Tuple[np.ndarray, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    """
-    Generate matrices $A$, $H$, and $W$, as well as the solution and $y$.
+    """Generate matrices $A$, $H$, and $W$, as well as the solution and $y$.
 
     Args:
       n: Number of rows.
@@ -51,9 +50,8 @@ def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, d
     return A, H, W, solution, y
 
 def decompose_matrix(A: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    """
-    Decompose a given matrix into its diagonal, lower triangular, upper triangular
-    components and their inverses.
+    """Decompose a given matrix into its diagonal, lower triangular, upper
+    triangular components and their inverses.
 
     Args:
       A: Input square matrix to decompose.

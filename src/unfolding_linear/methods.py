@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Salah Berra and contributors
+# Copyright (c) 2022-2024 Salah Berra and contributors
 # Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
 # at https://www.gnu.org/licenses/)
 
@@ -8,11 +8,11 @@ from typing import List, Tuple
 from .utils import device, decompose_matrix
 
 def model_iterations(
-    model, 
+    model,
     solution: torch.Tensor,
-    n: int, 
-    total_itr: int = 25, 
-    bs: int = 10000, 
+    n: int,
+    total_itr: int = 25,
+    bs: int = 10000,
     ) -> Tuple[List[torch.Tensor], List[float]]:
     """
     Perform iterations using the provided model and calculate the error norm at each iteration.
@@ -31,14 +31,14 @@ def model_iterations(
     """
     norm_list_model = []  # Initialize the iteration list
     s_hats = []
-    
+
     for i in range(total_itr + 1):
         s_hat, _ = model.iterate(i)
         err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (n * bs)
-        
+
         s_hats.append(s_hat)
         norm_list_model.append(err)
-    
+
     return s_hats, norm_list_model
 
 class base_model:
@@ -124,7 +124,7 @@ class GS(base_model):
             y (torch.Tensor): Solution tensor.
         """
         super(GS, self).__init__(n, A, H, bs, y)
-        
+
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
         """
         Perform the Gauss-Seidel iterations and return the final solution.
@@ -133,7 +133,7 @@ class GS(base_model):
             - num_itr (int): The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]: 
+            - Tuple[torch.Tensor, list]:
                 - torch.Tensor: The final solution tensor of shape (bs, n).
                 - list: List containing the trajectory of solutions throughout the iterations.
         """
@@ -575,7 +575,7 @@ class AOR_CHEBY(base_model):
         Initialize the AOR-Chebyshev solver.
 
         Args:
-        
+
             - n (int): Dimension of the solution.
             - A (np.ndarray): Input square matrix to decompose.
             - H (torch.Tensor): Random matrix H.
