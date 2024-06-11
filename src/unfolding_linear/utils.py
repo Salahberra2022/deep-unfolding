@@ -25,11 +25,11 @@ def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, d
 
     Returns:
       A tuple with the following contents:
-        - Matrix $A$ (square matrix) of shape `(n, n)`
-        - Matrix $H$ (random matrix) of shape `(n, m)`
-        - Matrix $W$ with diagonal eigenvalues of A of shape `(n, n)`
-        - Solution tensor of shape `(bs, n)`
-        - Tensor $y$ resulting from `solution @ H` of shape `(bs, m)`
+        - Matrix $A$ (square matrix) of shape (`n`, `n`)
+        - Matrix $H$ (random matrix) of shape (`n`, `m`)
+        - Matrix $W$ with diagonal eigenvalues of $A$ of shape (`n`, `n`)
+        - Solution tensor of shape (`bs`, `n`)
+        - Tensor $y$ resulting from `solution @ H` of shape (`bs`, `m`)
     """
     np.random.seed(seed=seed)
     H = np.random.normal(0, 1.0 / math.sqrt(n), (n, m))
@@ -63,7 +63,7 @@ def decompose_matrix(A: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.T
         - $L$: Lower triangular matrix of $A$.
         - $U$: Upper triangular matrix of $A$.
         - $D^{-1}$: Inverse of the diagonal matrix $D$.
-        - $M^{-1}$: Inverse of the matrix ($D + L$).
+        - $M^{-1}$: Inverse of the matrix $D + L$.
     """
     # Decomposed matrix calculations
     D = np.diag(np.diag(A))  # Diagonal matrix

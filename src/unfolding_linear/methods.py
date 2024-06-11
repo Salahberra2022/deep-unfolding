@@ -13,21 +13,21 @@ def model_iterations(
     n: int,
     total_itr: int = 25,
     bs: int = 10000,
-    ) -> Tuple[List[torch.Tensor], List[float]]:
-    """
-    Perform iterations using the provided model and calculate the error norm at each iteration.
+) -> Tuple[List[torch.Tensor], List[float]]:
+    """Perform iterations using the provided model and calculate the error norm
+      at each iteration.
 
     Args:
-        - total_itr (int): Total number of iterations to perform.
-        - n (int): Dimension of the solution.
-        - bs (int): Batch size.
-        - model: The model instance that provides the iterate method.
-        - solution (torch.Tensor): The ground truth solution tensor.
+      total_itr: Total number of iterations to perform.
+      n: Dimension of the solution.
+      bs: Batch size.
+      model: The model instance that provides the iterate method.
+      solution: The ground truth solution tensor.
 
     Returns:
-        - Tuple[List[torch.Tensor], List[float]]:
-            - List of tensors representing the solution estimates at each iteration.
-            - List of float values representing the normalized error at each iteration.
+      A tuple with the following contents:
+        - List of tensors representing the solution estimates at each iteration.
+        - List of float values representing the normalized error at each iteration.
     """
     norm_list_model = []  # Initialize the iteration list
     s_hats = []
@@ -42,39 +42,48 @@ def model_iterations(
     return s_hats, norm_list_model
 
 class base_model:
-    """
-    Base model class for matrix decomposition and initialization.
+    """Base model class for matrix decomposition and initialization."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-    """
+    H: torch.Tensor
+    """Random matrix $H$."""
+
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor):
-        """
-        Initialize the base_model with the given parameters and decompose matrix A.
+        """Initialize the base_model with the given parameters and decompose matrix $A$.
 
         Args:
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
         """
         self.n = n
         self.H = H
@@ -84,58 +93,65 @@ class base_model:
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(A)
 
 class GS(base_model):
-    """
-    Class implementing the Gauss-Seidel algorithm for solving a linear system.
+    """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-        - num_itr (int): The number of Gauss-Seidel iterations to perform.
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        - iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the Gauss-Seidel iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
+    num_itr: int
+    """The number of Gauss-Seidel iterations to perform."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor):
-        """
-        Initialize the Gauss-Seidel solver.
+        """Initialize the Gauss-Seidel solver.
 
         Args:
-            n (int): Dimension of the solution.
-            A (np.ndarray): Input square matrix to decompose.
-            H (torch.Tensor): Random matrix H.
-            bs (int): Batch size.
-            y (torch.Tensor): Solution tensor.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix H.
+          bs: Batch size.
+          y: Solution tensor.
         """
         super(GS, self).__init__(n, A, H, bs, y)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the Gauss-Seidel iterations and return the final solution.
+        """Performs the Gauss-Seidel iterations and returns the final solution
+          and trajectory of solutions.
 
         Args:
-            - num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
         s = torch.zeros(self.bs, self.n).to(device)
@@ -152,57 +168,62 @@ class GS(base_model):
         return s, traj
 
 class RI(base_model):
-    """
-    Class implementing the Richardson iteration algorithm for solving a linear system.
+    """Class implementing the Richardson iteration algorithm for solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the Richardson iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor):
-        """
-        Initialize the Richardson iteration solver.
+        """Initialize the Richardson iteration solver.
 
         Args:
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
         """
         super(RI, self).__init__(n, A, H, bs, y)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the Richardson iterations and return the final solution.
+        """Performs the Richardson iterations and returns the final solution and
+          trajectory of solutions.
 
         Args:
-            num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
         omega = torch.tensor(0.25)
@@ -219,61 +240,67 @@ class RI(base_model):
         return s, traj
 
 class Jacobi(base_model):
-    """
-    Class implementing the Jacobi iteration algorithm for solving a linear system.
+    """Class implementing the Jacobi iteration algorithm for solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - omega (float, optional): Relaxation parameter for Jacobi iterations. Defaults to 0.2.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-        - omega (torch.Tensor): Relaxation parameter for Jacobi iterations.
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the Jacobi iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
+    omega: torch.Tensor
+    """Relaxation parameter for Jacobi iterations."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.2):
-        """
-        Initialize the Jacobi iteration solver.
+        """Initialize the Jacobi iteration solver.
 
         Args:
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
-            - omega (float, optional): Relaxation parameter for Jacobi iterations. Defaults to 0.2.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
+          omega: Relaxation parameter for Jacobi iterations.
         """
         super(Jacobi, self).__init__(n, A, H, bs, y)
         self.omega = torch.tensor(omega)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the Jacobi iterations and return the final solution.
+        """Performs the Jacobi iterations and returns the final solution and
+          trajectory of solutions.
 
         Args:
-            num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
         s = torch.zeros(self.bs, self.n).to(device)
@@ -290,61 +317,68 @@ class Jacobi(base_model):
         return s, traj
 
 class SOR(base_model):
-    """
-    Class implementing the Successive Over-Relaxation (SOR) algorithm for solving a linear system.
+    """Class implementing the Successive Over-Relaxation (SOR) algorithm for
+      solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - omega (float, optional): Relaxation parameter for SOR iterations. Defaults to 1.8.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-        - omega (torch.Tensor): Relaxation parameter for SOR iterations.
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the SOR iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
+    omega: torch.Tensor
+    """Relaxation parameter for SOR iterations."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8):
-        """
-        Initialize the SOR solver.
+        """Initialize the SOR solver.
 
         Args:
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
-            - omega (float, optional): Relaxation parameter for SOR iterations. Defaults to 1.8.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
+          omega: Relaxation parameter for SOR iterations.
         """
         super(SOR, self).__init__(n, A, H, bs, y)
         self.omega = torch.tensor(omega)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the SOR iterations and return the final solution.
+        """Performs the SOR iterations and returns the final solution and
+          trajectory of solutions.
 
         Args:
-            num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
         n = self.y.size(1)
@@ -367,52 +401,60 @@ class SOR(base_model):
 
 
 class SOR_CHEBY(base_model):
-    """
-    Class implementing the SOR-Chebyshev algorithm for solving a linear system.
+    """Class implementing the SOR-Chebyshev algorithm for solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - omega (float, optional): Relaxation parameter for SOR iterations. Defaults to 1.8.
-        - omegaa (float, optional): Acceleration parameter for SOR-Chebyshev iterations. Defaults to 0.8.
-        - gamma (float, optional): Damping factor for SOR-Chebyshev iterations. Defaults to 0.8.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-        - omega (torch.Tensor): Relaxation parameter for SOR iterations.
-        - omegaa (torch.Tensor): Acceleration parameter for SOR-Chebyshev iterations.
-        - gamma (torch.Tensor): Damping factor for SOR-Chebyshev iterations.
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the SOR-Chebyshev iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
+    omega: torch.Tensor
+    """Relaxation parameter for SOR iterations."""
+
+    omegaa: torch.Tensor
+    """Acceleration parameter for SOR-Chebyshev iterations."""
+
+    gamma: torch.Tensor
+    """Damping factor for SOR-Chebyshev iterations."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8, omegaa: float = 0.8, gamma: float = 0.8):
-        """
-        Initialize the SOR-Chebyshev solver.
+        """Initialize the SOR-Chebyshev solver.
 
         Args:
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
-            - omega (float, optional): Relaxation parameter for SOR iterations. Defaults to 1.8.
-            - omegaa (float, optional): Acceleration parameter for SOR-Chebyshev iterations. Defaults to 0.8.
-            - gamma (float, optional): Damping factor for SOR-Chebyshev iterations. Defaults to 0.8.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
+          omega: Relaxation parameter for SOR iterations.
+          omegaa: Acceleration parameter for SOR-Chebyshev iterations.
+          gamma: Damping factor for SOR-Chebyshev iterations.
         """
         super(SOR_CHEBY, self).__init__(n, A, H, bs, y)
         self.omega = torch.tensor(omega)
@@ -420,16 +462,16 @@ class SOR_CHEBY(base_model):
         self.gamma = torch.tensor(gamma)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the SOR-Chebyshev iterations and return the final solution.
+        """Performs the SOR-Chebyshev iterations and returns the final solution
+          and trajectory of solutions.
 
         Args:
-            num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
 
@@ -459,65 +501,73 @@ class SOR_CHEBY(base_model):
         return s_new, traj
 
 class AOR(base_model):
-    """
-    Class implementing the Accelerated Over-Relaxation (AOR) algorithm for solving a linear system.
+    """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
+      solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - omega (float, optional): Relaxation parameter for AOR iterations. Defaults to 0.3.
-        - r (float, optional): Relaxation parameter r. Defaults to 0.2.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-        - omega (torch.Tensor): Relaxation parameter for AOR iterations.
-        - r (torch.Tensor): Relaxation parameter r.
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the AOR iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
+    omega: torch.Tensor
+    """Relaxation parameter for AOR iterations."""
+
+    r: torch.Tensor
+    """Relaxation parameter."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.3, r: float = 0.2):
-        """
-        Initialize the AOR solver.
+        """Initialize the AOR solver.
 
         Args:
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
-            - omega (float, optional): Relaxation parameter for AOR iterations. Defaults to 0.3.
-            - r (float, optional): Relaxation parameter r. Defaults to 0.2.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
+          omega: Relaxation parameter for AOR iterations.
+          r: Relaxation parameter.
         """
         super(AOR, self).__init__(n, A, H, bs, y)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the AOR iterations and return the final solution.
+        """Performs the AOR iterations and returns the final solution and
+          trajectory of solutions.
 
         Args:
-            num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
 
@@ -539,66 +589,73 @@ class AOR(base_model):
 
 
 class AOR_CHEBY(base_model):
-    """
-    Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev acceleration algorithm for solving a linear system.
+    """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
+      acceleration algorithm for solving a linear system."""
 
-    Args:
-        - n (int): Dimension of the solution.
-        - A (np.ndarray): Input square matrix to decompose.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - omega (float, optional): Relaxation parameter for AOR iterations. Defaults to 0.1.
-        - r (float, optional): Relaxation parameter r. Defaults to 0.1.
+    n: int
+    """Dimension of the solution."""
 
-    Attributes:
-        - n (int): Dimension of the solution.
-        - H (torch.Tensor): Random matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution tensor.
-        - A (torch.Tensor): Original matrix converted to a torch tensor.
-        - D (torch.Tensor): Diagonal matrix of A.
-        - L (torch.Tensor): Lower triangular matrix of A.
-        - U (torch.Tensor): Upper triangular matrix of A.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - Minv (torch.Tensor): Inverse of the matrix (D + L).
-        - omega (torch.Tensor): Relaxation parameter for AOR iterations.
-        - r (torch.Tensor): Relaxation parameter r.
+    H: torch.Tensor
+    """Random matrix $H$."""
 
-    Methods:
-        iterate(num_itr: int) -> Tuple[torch.Tensor, list]:
-            Performs the AOR-Chebyshev iterations and returns the final solution and trajectory of solutions.
-    """
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution tensor."""
+
+    A: torch.Tensor
+    """Original matrix converted to a torch tensor."""
+
+    D: torch.Tensor
+    """Diagonal matrix of $A$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix of $A$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix of $A$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    Minv: torch.Tensor
+    """Inverse of the matrix $D + L$."""
+
+    omega: torch.Tensor
+    """Relaxation parameter for AOR iterations."""
+
+    r: torch.Tensor
+    """Relaxation parameter."""
+
 
     def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.1, r: float = 0.1):
-        """
-        Initialize the AOR-Chebyshev solver.
+        """Initialize the AOR-Chebyshev solver.
 
         Args:
-
-            - n (int): Dimension of the solution.
-            - A (np.ndarray): Input square matrix to decompose.
-            - H (torch.Tensor): Random matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution tensor.
-            - omega (float, optional): Relaxation parameter for AOR iterations. Defaults to 0.1.
-            - r (float, optional): Relaxation parameter r. Defaults to 0.1.
+          n: Dimension of the solution.
+          A: Input square matrix to decompose.
+          H: Random matrix $H$.
+          bs: Batch size.
+          y: Solution tensor.
+          omega: Relaxation parameter for AOR iterations.
+          r: Relaxation parameter.
         """
         super(AOR_CHEBY, self).__init__(n, A, H, bs, y)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
     def iterate(self, num_itr: int = 25) -> Tuple[torch.Tensor, list]:
-        """
-        Perform the AOR-Chebyshev iterations and return the final solution.
+        """Performs the AOR-Chebyshev iterations and returns the final solution
+          and trajectory of solutions.
 
         Args:
-            num_itr (int): The number of iterations to perform.
+          num_itr: The number of iterations to perform.
 
         Returns:
-            - Tuple[torch.Tensor, list]:
-                - torch.Tensor: The final solution tensor of shape (bs, n).
-                - list: List containing the trajectory of solutions throughout the iterations.
+          A tuple with the following contents:
+            - The final solution tensor of shape (`bs`, `n`).
+            - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
 
