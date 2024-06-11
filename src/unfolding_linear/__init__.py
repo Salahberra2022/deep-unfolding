@@ -9,6 +9,7 @@ __all__ = [
     "AORNet",
     "base_model",
     "decompose_matrix",
+    "device",
     "evaluate_model",
     "generate_A_H_sol",
     "GS",
@@ -44,5 +45,6 @@ from unfolding_linear.train_methods import (
 )
 from unfolding_linear.utils import (
     decompose_matrix,
+    device,
     generate_A_H_sol,
 )
