@@ -41,9 +41,6 @@ dev = [
     "coverage",
     "pytest-cov >= 3.0.0" ]
 
-[tool.setuptools.packages]
-find = {}
-
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = ""
