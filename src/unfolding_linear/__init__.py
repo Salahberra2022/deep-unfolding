@@ -6,6 +6,8 @@
 .. include:: ../../README.md
 """
 
+__docformat__ = "google"
+
 __all__ = [
     "AOR",
     "AOR_CHEBY",
