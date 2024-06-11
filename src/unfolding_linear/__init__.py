@@ -2,6 +2,9 @@
 # Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
 # at https://www.gnu.org/licenses/)
 
+"""
+.. include:: ../../README.md
+"""
 
 __all__ = [
     "AOR",

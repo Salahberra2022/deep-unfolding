@@ -37,6 +37,7 @@ dependencies = [ "numpy >= 1.26", "torch>=2.3" ]
 
 [project.optional-dependencies]
 dev = [
+    "pdoc >= 14.5",
     "pytest >= 7.0",
     "coverage",
     "pytest-cov >= 3.0.0" ]
