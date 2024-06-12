@@ -7,8 +7,8 @@ name = "unfolding_linear"
 description = "Deep unfolding of iterative methods to solve linear equations"
 version = "0.1.0"
 authors = [
-    { name = "Salah Berra", email = "salahberra39@gmail.com"},
-    { name = "Nennouche Mohamed", email = "moohaameed.nennouche@gmail.com"},
+    { name = "Salah Berra", email = "salahberra39@gmail.com" },
+    { name = "Nennouche Mohamed", email = "moohaameed.nennouche@gmail.com" },
     { name = "Nuno Fachada", email = "nuno.fachada@ulusofona.pt" }
 ]
 readme = "README.md"
@@ -28,7 +28,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering"
 ]
-dependencies = [ "numpy >= 1.26", "torch>=2.3" ]
+dependencies = [ "numpy >= 1.26", "torch >= 2.3" ]
 
 [project.urls]
 "Homepage" = "https://github.com/Salahberra2022/deep_unfolding"
