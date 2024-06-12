@@ -1,4 +1,8 @@
-[![Python](https://img.shields.io/pypi/pyversions/tensorflow.svg?style=plastic)](https://pypi.org/project/unfolding-linear/) [![PyPI](https://badge.fury.io/py/unfolding-linear.svg)](https://pypi.org/project/unfolding-linear/)
+[![Tests](https://github.com/Salahberra2022/deep_unfolding/actions/workflows/tests.yml/badge.svg)](https://github.com/Salahberra2022/deep_unfolding/actions/workflows/tests.yml)
+[![docs](https://img.shields.io/badge/docs-click_here-blue.svg)](https://Salahberra2022.github.io/deep_unfolding/)
+[![PyPI](https://img.shields.io/pypi/v/unfolding-linear)](https://pypi.org/project/unfolding-linear/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/unfolding-linear?color=blueviolet)
+[![GPLv3](https://img.shields.io/badge/license-GPLv3-yellowgreen.svg)](https://www.tldrlegal.com/license/gnu-general-public-license-v3-gpl-3)
 
 # unfolding-linear: Deep unfolding of iterative methods
 
