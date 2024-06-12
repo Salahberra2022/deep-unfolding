@@ -3,8 +3,10 @@
 import pytest
 import torch
 import numpy as np
-from unfolding_linear.methods import model_iterations, base_model, GS, RI, Jacobi, SOR, SOR_CHEBY, AOR, AOR_CHEBY
-from unfolding_linear.utils import device, decompose_matrix  # Assurez-vous que les utilitaires nécessaires sont importés correctement
+from unfolding_linear import (
+    model_iterations, base_model, GS, RI, Jacobi, SOR, SOR_CHEBY, AOR, AOR_CHEBY,
+    device, decompose_matrix
+)
 
 @pytest.fixture
 def generate_matrices():
@@ -25,11 +27,11 @@ def generate_solution():
 def test_model_iterations(generate_matrices, generate_solution):
     n, _, _, bs, _ = generate_matrices
     solution = generate_solution
-    
+
     class DummyModel:
         def iterate(self, i):
             return solution, []
-    
+
     model = DummyModel()
     s_hats, norm_list_model = model_iterations(model, solution, n, total_itr=5, bs=bs)
 
@@ -41,7 +43,7 @@ def test_model_iterations(generate_matrices, generate_solution):
 def test_base_model_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     model = base_model(n, A, H, bs, y)
-    
+
     assert model.n == n, "Attribute n should be initialized correctly"
     assert model.H.shape == H.shape, "Attribute H should be initialized correctly"
     assert model.bs == bs, "Attribute bs should be initialized correctly"
@@ -58,7 +60,7 @@ def test_base_model_initialization(generate_matrices):
 def test_GS_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     gs_model = GS(n, A, H, bs, y)
-    
+
     assert gs_model.n == n, "Attribute n should be initialized correctly in GS model"
     assert gs_model.H.shape == H.shape, "Attribute H should be initialized correctly in GS model"
     assert gs_model.bs == bs, "Attribute bs should be initialized correctly in GS model"
@@ -75,9 +77,9 @@ def test_GS_initialization(generate_matrices):
 def test_GS_iterate(generate_matrices):
     n, A, H, bs, y = generate_matrices
     gs_model = GS(n, A, H, bs, y)
-    
+
     s, traj = gs_model.iterate(num_itr=5)
-    
+
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert traj[0].shape == (bs, n), "Each element in the trajectory should have shape (bs, n)"
     assert s.shape == (bs, n), "Final solution tensor should have shape (bs, n)"
@@ -85,7 +87,7 @@ def test_GS_iterate(generate_matrices):
 def test_RI_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     ri_model = RI(n, A, H, bs, y)
-    
+
     assert ri_model.n == n, "Attribute n should be initialized correctly in RI model"
     assert ri_model.H.shape == H.shape, "Attribute H should be initialized correctly in RI model"
     assert ri_model.bs == bs, "Attribute bs should be initialized correctly in RI model"
@@ -102,7 +104,7 @@ def test_RI_initialization(generate_matrices):
 def test_RI_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
     ri_model = RI(n, A, H, bs, y)
-    
+
     s, traj = ri_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
@@ -110,7 +112,7 @@ def test_RI_iteration(generate_matrices):
 def test_Jacobi_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     jacobi_model = Jacobi(n, A, H, bs, y, omega=0.2)
-    
+
     assert jacobi_model.n == n, "Attribute n should be initialized correctly in Jacobi model"
     assert jacobi_model.H.shape == H.shape, "Attribute H should be initialized correctly in Jacobi model"
     assert jacobi_model.bs == bs, "Attribute bs should be initialized correctly in Jacobi model"
@@ -128,7 +130,7 @@ def test_Jacobi_initialization(generate_matrices):
 def test_Jacobi_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
     jacobi_model = Jacobi(n, A, H, bs, y, omega=0.2)
-    
+
     s, traj = jacobi_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
@@ -136,7 +138,7 @@ def test_Jacobi_iteration(generate_matrices):
 def test_SOR_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     sor_model = SOR(n, A, H, bs, y, omega=1.8)
-    
+
     assert sor_model.n == n, "Attribute n should be initialized correctly in SOR model"
     assert sor_model.H.shape == H.shape, "Attribute H should be initialized correctly in SOR model"
     assert sor_model.bs == bs, "Attribute bs should be initialized correctly in SOR model"
@@ -154,7 +156,7 @@ def test_SOR_initialization(generate_matrices):
 def test_SOR_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
     sor_model = SOR(n, A, H, bs, y, omega=1.8)
-    
+
     s, traj = sor_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
@@ -162,7 +164,7 @@ def test_SOR_iteration(generate_matrices):
 def test_SOR_CHEBY_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     sor_cheby_model = SOR_CHEBY(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
-    
+
     assert sor_cheby_model.n == n, "Attribute n should be initialized correctly in SOR_CHEBY model"
     assert sor_cheby_model.H.shape == H.shape, "Attribute H should be initialized correctly in SOR_CHEBY model"
     assert sor_cheby_model.bs == bs, "Attribute bs should be initialized correctly in SOR_CHEBY model"
@@ -182,7 +184,7 @@ def test_SOR_CHEBY_initialization(generate_matrices):
 def test_SOR_CHEBY_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
     sor_cheby_model = SOR_CHEBY(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
-    
+
     s, traj = sor_cheby_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
@@ -190,7 +192,7 @@ def test_SOR_CHEBY_iteration(generate_matrices):
 def test_AOR_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     aor_model = AOR(n, A, H, bs, y, omega=0.3, r=0.2)
-    
+
     assert aor_model.n == n, "Attribute n should be initialized correctly in AOR model"
     assert aor_model.H.shape == H.shape, "Attribute H should be initialized correctly in AOR model"
     assert aor_model.bs == bs, "Attribute bs should be initialized correctly in AOR model"
@@ -209,7 +211,7 @@ def test_AOR_initialization(generate_matrices):
 def test_AOR_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
     aor_model = AOR(n, A, H, bs, y, omega=0.3, r=0.2)
-    
+
     s, traj = aor_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
@@ -217,7 +219,7 @@ def test_AOR_iteration(generate_matrices):
 def test_AOR_CHEBY_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
     aor_cheby_model = AOR_CHEBY(n, A, H, bs, y, omega=0.1, r=0.1)
-    
+
     assert aor_cheby_model.n == n, "Attribute n should be initialized correctly in AOR_CHEBY model"
     assert aor_cheby_model.H.shape == H.shape, "Attribute H should be initialized correctly in AOR_CHEBY model"
     assert aor_cheby_model.bs == bs, "Attribute bs should be initialized correctly in AOR_CHEBY model"
@@ -236,7 +238,7 @@ def test_AOR_CHEBY_initialization(generate_matrices):
 def test_AOR_CHEBY_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
     aor_cheby_model = AOR_CHEBY(n, A, H, bs, y, omega=0.1, r=0.1)
-    
+
     s, traj = aor_cheby_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
     assert s.shape == (bs, n), "Final solution tensor should have the correct shape"
