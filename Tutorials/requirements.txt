@@ -1,0 +1,2 @@
+deep-unfolding>=0.2.0
+matplotlib>=3.5.0
