@@ -1,4 +1,5 @@
 [![Tests](https://github.com/Salahberra2022/deep_unfolding/actions/workflows/tests.yml/badge.svg)](https://github.com/Salahberra2022/deep_unfolding/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/Salahberra2022/deep_unfolding/branch/main/graph/badge.svg?token=UPDATEME)](https://codecov.io/gh/Salahberra2022/deep_unfolding)
 [![docs](https://img.shields.io/badge/docs-click_here-blue.svg)](https://Salahberra2022.github.io/deep_unfolding/)
 [![PyPI](https://img.shields.io/pypi/v/unfolding-linear)](https://pypi.org/project/unfolding-linear/)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/unfolding-linear?color=blueviolet)
