@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "unfolding_linear"
+name = "deep-unfolding"
 description = "Deep unfolding of iterative methods to solve linear equations"
 version = "0.1.0"
 authors = [
@@ -62,7 +62,7 @@ norecursedirs = [
     ".git",
     "__pycache__" ]
 testpaths = [
-    "src/unfolding_linear",
+    "src/deep_unfolding",
     "tests" ]
 
 [tool.mypy]

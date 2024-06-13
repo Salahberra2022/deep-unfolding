@@ -1,7 +1,7 @@
 import pytest
 import torch
 import torch.nn as nn
-from unfolding_linear import (
+from deep_unfolding import (
     train_model, evaluate_model, SORNet, SOR_CHEBY_Net, AORNet, RINet,
     device, generate_A_H_sol
 )

@@ -16,7 +16,7 @@ jobs:
           pip3 install .[dev]
           mkdir -p site/img
           cp docs/img/*.png site/img
-          pdoc --math src/unfolding_linear --logo img/logo.png --favicon img/favicon.png -o site
+          pdoc --math src/deep_unfolding --logo img/logo.png --favicon img/favicon.png -o site
       - name: Deploy to GitHub pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:

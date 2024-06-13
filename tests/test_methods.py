@@ -3,7 +3,7 @@
 import pytest
 import torch
 import numpy as np
-from unfolding_linear import (
+from deep_unfolding import (
     model_iterations, base_model, GS, RI, Jacobi, SOR, SOR_CHEBY, AOR, AOR_CHEBY,
     device, decompose_matrix
 )
