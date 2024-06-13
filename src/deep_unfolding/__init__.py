@@ -29,7 +29,7 @@ __all__ = [
     "train_model",
 ]
 
-from unfolding_linear.methods import (
+from deep_unfolding.methods import (
     AOR,
     AOR_CHEBY,
     base_model,
@@ -40,7 +40,7 @@ from unfolding_linear.methods import (
     SOR,
     SOR_CHEBY,
 )
-from unfolding_linear.train_methods import (
+from deep_unfolding.train_methods import (
     AORNet,
     evaluate_model,
     RINet,
@@ -48,7 +48,7 @@ from unfolding_linear.train_methods import (
     SOR_CHEBY_Net,
     train_model,
 )
-from unfolding_linear.utils import (
+from deep_unfolding.utils import (
     decompose_matrix,
     device,
     generate_A_H_sol,

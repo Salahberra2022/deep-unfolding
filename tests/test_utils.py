@@ -1,4 +1,4 @@
-from unfolding_linear import generate_A_H_sol, decompose_matrix
+from deep_unfolding import generate_A_H_sol, decompose_matrix
 import pytest
 import torch
 import numpy as np

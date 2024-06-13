@@ -1,13 +1,13 @@
 [![Tests](https://github.com/Salahberra2022/deep-unfolding/actions/workflows/tests.yml/badge.svg)](https://github.com/Salahberra2022/deep-unfolding/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/Salahberra2022/deep-unfolding/branch/main/graph/badge.svg?token=UPDATEME)](https://codecov.io/gh/Salahberra2022/deep-unfolding)
 [![docs](https://img.shields.io/badge/docs-click_here-blue.svg)](https://Salahberra2022.github.io/deep-unfolding/)
-[![PyPI](https://img.shields.io/pypi/v/unfolding-linear)](https://pypi.org/project/unfolding-linear/)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/unfolding-linear?color=blueviolet)
+[![PyPI](https://img.shields.io/pypi/v/deep-unfolding)](https://pypi.org/project/deep-unfolding/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/deep-unfolding?color=blueviolet)
 [![GPLv3](https://img.shields.io/badge/license-GPLv3-yellowgreen.svg)](https://www.tldrlegal.com/license/gnu-general-public-license-v3-gpl-3)
 
-# unfolding-linear: Deep unfolding of iterative methods
+# deep-unfolding: Deep unfolding of iterative methods
 
-The **unfolding-linear** package includes iterative methods for solving linear equations. However, due to the various parameters and performance characteristics of the iterative approach, it is necessary to optimize these parameters to improve the convergence rate. **unfolding-linear** takes an iterative algorithm with a fixed number of iterations $T$, unravels its structure, and adds trainable parameters. These parameters are then trained using deep learning techniques such as loss functions, stochastic gradient descent, and backpropagation.
+The **deep-unfolding** package includes iterative methods for solving linear equations. However, due to the various parameters and performance characteristics of the iterative approach, it is necessary to optimize these parameters to improve the convergence rate. **deep-unfolding** takes an iterative algorithm with a fixed number of iterations $T$, unravels its structure, and adds trainable parameters. These parameters are then trained using deep learning techniques such as loss functions, stochastic gradient descent, and backpropagation.
 
 The package contains two different modules containing iterative methods. The first, `methods`, includes conventional iterative methods. The second, `train_methods`, includes deep unfolding versions of the conventional methods.
 
@@ -15,13 +15,13 @@ The package contains two different modules containing iterative methods. The fir
 
 ```bash
 pip install --upgrade pip
-pip install unfolding-linear
+pip install deep-unfolding
 ```
 
 ## Quick start
 
 ```python
-from unfolding_linear import device, evaluate_model, generate_A_H_sol, SORNet, train_model
+from deep_unfolding import device, evaluate_model, generate_A_H_sol, SORNet, train_model
 from torch import nn, optim
 
 total_itr = 25  # Total number of iterations
