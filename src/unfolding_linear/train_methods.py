@@ -1,7 +1,7 @@
 from .utils import device, decompose_matrix
 import torch
 import torch.nn as nn
-from typing import Tuple, List
+
 
 def train_model(
     model: torch.nn.Module,
@@ -10,7 +10,7 @@ def train_model(
     solution: torch.Tensor,
     total_itr: int = 25,
     num_batch: int = 10000
-) -> Tuple[torch.nn.Module, List[float]]:
+) -> tuple[torch.nn.Module, list[float]]:
     """Train the given model using the specified optimizer and loss function.
 
     Args:
@@ -46,9 +46,9 @@ def evaluate_model(
     bs: int = 10000,
     total_itr: int = 25,
     device: torch.device = device
-) -> List[float]:
+) -> list[float]:
     """Evaluate the model by calculating the mean squared error (MSE) between
-    the solution and the model's predictions.
+      the solution and the model's predictions.
 
     Args:
       model: The model to be evaluated.
@@ -128,7 +128,7 @@ class SORNet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """Perform forward pass of the SORNet model.
 
         Args:
@@ -224,7 +224,7 @@ class SOR_CHEBY_Net(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """Perform forward pass of the SOR_CHEBY_Net model.
 
         Args:
@@ -295,7 +295,6 @@ class AORNet(nn.Module):
     y: torch.Tensor
     """Solution of the linear equation."""
 
-
     def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_AORNet_r: float = 0.9, init_val_AORNet_omega: float = 1.5, device: torch.device = device):
         """
         Initialize the AORNet model.
@@ -324,7 +323,7 @@ class AORNet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, list[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """Perform forward pass of the AORNet model.
 
         Args:
@@ -407,7 +406,7 @@ class RINet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, list[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """Perform forward pass of the RINet model.
 
         Args:

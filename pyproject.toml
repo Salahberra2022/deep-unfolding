@@ -7,8 +7,8 @@ name = "unfolding_linear"
 description = "Deep unfolding of iterative methods to solve linear equations"
 version = "0.1.0"
 authors = [
-    { name = "Salah Berra", email = "salahberra39@gmail.com"},
-    { name = "Nennouche Mohamed", email = "moohaameed.nennouche@gmail.com"},
+    { name = "Salah Berra", email = "salahberra39@gmail.com" },
+    { name = "Nennouche Mohamed", email = "moohaameed.nennouche@gmail.com" },
     { name = "Nuno Fachada", email = "nuno.fachada@ulusofona.pt" }
 ]
 readme = "README.md"
@@ -28,7 +28,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering"
 ]
-dependencies = [ "numpy >= 1.26", "torch>=2.3" ]
+dependencies = [ "numpy >= 1.26", "torch >= 2.3" ]
 
 [project.urls]
 "Homepage" = "https://github.com/Salahberra2022/deep_unfolding"
@@ -38,13 +38,18 @@ dependencies = [ "numpy >= 1.26", "torch>=2.3" ]
 [project.optional-dependencies]
 dev = [
     "pdoc >= 14.5",
+    "coverage >= 7.2",
+    "mypy >= 1.5",
     "pytest >= 7.0",
-    "coverage",
+    "pytest-mypy >= 0.10.3",
     "pytest-cov >= 3.0.0" ]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = ""
+addopts = "--mypy"
 norecursedirs = [
     "hooks",
     "*.egg",
@@ -56,4 +61,11 @@ norecursedirs = [
     ".tox",
     ".git",
     "__pycache__" ]
-testpaths = ["src/unfolding_linear", "tests"]
+testpaths = [
+    "src/unfolding_linear",
+    "tests" ]
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_ignores = true
+
