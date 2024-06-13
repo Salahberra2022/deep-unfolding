@@ -44,6 +44,9 @@ dev = [
     "pytest-mypy >= 0.10.3",
     "pytest-cov >= 3.0.0" ]
 
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "--mypy"
