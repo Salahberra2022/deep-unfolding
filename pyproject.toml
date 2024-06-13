@@ -38,13 +38,15 @@ dependencies = [ "numpy >= 1.26", "torch >= 2.3" ]
 [project.optional-dependencies]
 dev = [
     "pdoc >= 14.5",
+    "coverage >= 7.2",
+    "mypy >= 1.5",
     "pytest >= 7.0",
-    "coverage",
+    "pytest-mypy >= 0.10.3",
     "pytest-cov >= 3.0.0" ]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = ""
+addopts = "--mypy"
 norecursedirs = [
     "hooks",
     "*.egg",
@@ -56,4 +58,11 @@ norecursedirs = [
     ".tox",
     ".git",
     "__pycache__" ]
-testpaths = ["src/unfolding_linear", "tests"]
+testpaths = [
+    "src/unfolding_linear",
+    "tests" ]
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_ignores = true
+
