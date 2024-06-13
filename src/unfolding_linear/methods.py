@@ -4,6 +4,7 @@
 
 import torch
 import numpy as np
+from numpy.typing import NDArray
 from .utils import device, decompose_matrix
 
 
@@ -75,7 +76,7 @@ class base_model:
     """Inverse of the matrix $D + L$."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
         """Initialize the base_model with the given parameters and decompose matrix $A$.
 
         Args:
@@ -129,7 +130,7 @@ class GS(base_model):
     """The number of Gauss-Seidel iterations to perform."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
         """Initialize the Gauss-Seidel solver.
 
         Args:
@@ -201,7 +202,7 @@ class RI(base_model):
     """Inverse of the matrix $D + L$."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
         """Initialize the Richardson iteration solver.
 
         Args:
@@ -276,7 +277,7 @@ class Jacobi(base_model):
     """Relaxation parameter for Jacobi iterations."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.2):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.2):
         """Initialize the Jacobi iteration solver.
 
         Args:
@@ -354,7 +355,7 @@ class SOR(base_model):
     """Relaxation parameter for SOR iterations."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8):
         """Initialize the SOR solver.
 
         Args:
@@ -443,7 +444,7 @@ class SOR_CHEBY(base_model):
     """Damping factor for SOR-Chebyshev iterations."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8, omegaa: float = 0.8, gamma: float = 0.8):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8, omegaa: float = 0.8, gamma: float = 0.8):
         """Initialize the SOR-Chebyshev solver.
 
         Args:
@@ -541,7 +542,7 @@ class AOR(base_model):
     """Relaxation parameter."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.3, r: float = 0.2):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.3, r: float = 0.2):
         """Initialize the AOR solver.
 
         Args:
@@ -629,7 +630,7 @@ class AOR_CHEBY(base_model):
     """Relaxation parameter."""
 
 
-    def __init__(self, n: int, A: np.ndarray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.1, r: float = 0.1):
+    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.1, r: float = 0.1):
         """Initialize the AOR-Chebyshev solver.
 
         Args:
