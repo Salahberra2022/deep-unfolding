@@ -2,6 +2,11 @@
 # Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
 # at https://www.gnu.org/licenses/)
 
+"""
+.. include:: ../../README.md
+"""
+
+__docformat__ = "google"
 
 __all__ = [
     "AOR",

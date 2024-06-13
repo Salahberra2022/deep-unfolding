@@ -64,7 +64,7 @@ This package also implements several models based on **Deep Unfolding Learning**
 
 ## Reference
 
-If you use this software, please cite the following reference: _available soon_
+If you use this software, please cite the following reference: *available soon*
 
 ## License
 

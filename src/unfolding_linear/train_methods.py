@@ -4,27 +4,25 @@ import torch.nn as nn
 from typing import Tuple, List
 
 def train_model(
-    model: torch.nn.Module, 
-    optimizer: torch.optim.Optimizer, 
-    loss_func: torch.nn.Module, 
-    solution: torch.Tensor, 
-    total_itr: int = 25, 
+    model: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    loss_func: torch.nn.Module,
+    solution: torch.Tensor,
+    total_itr: int = 25,
     num_batch: int = 10000
 ) -> Tuple[torch.nn.Module, List[float]]:
-    """
-    Train the given model using the specified optimizer and loss function.
+    """Train the given model using the specified optimizer and loss function.
 
     Args:
-        - model (torch.nn.Module): The model to be trained.
-        - optimizer (torch.optim.Optimizer): The optimizer to use for training.
-        - loss_func (torch.nn.Module): The loss function to use for training.
-        - total_itr (int): The total number of iterations (generations) for training.
-        - solution (torch.Tensor): The target solution tensor.
-        - num_batch (int): The number of batches per iteration.
+      model: The model to be trained.
+      optimizer: The optimizer to use for training.
+      loss_func: The loss function to use for training.
+      total_itr: The total number of iterations (generations) for training.
+      solution: The target solution tensor.
+      num_batch: The number of batches per iteration.
 
     Returns:
-        Tuple[torch.nn.Module, List[float]]: The trained model and the list of loss values per iteration.
-
+      The trained model and the list of loss values per iteration.
     """
     loss_gen = []
     for gen in range(total_itr):
@@ -34,7 +32,7 @@ def train_model(
             loss = loss_func(x_hat, solution)
             loss.backward()
             optimizer.step()
-            
+
             if i % 200 == 0:
                 print("generation:", gen + 1, " batch:", i, "\t MSE loss:", loss.item())
         loss_gen.append(loss.item())
@@ -42,26 +40,26 @@ def train_model(
 
 
 def evaluate_model(
-    model: torch.nn.Module, 
-    solution: torch.Tensor, 
-    n: int, 
-    bs: int = 10000, 
-    total_itr: int = 25, 
+    model: torch.nn.Module,
+    solution: torch.Tensor,
+    n: int,
+    bs: int = 10000,
+    total_itr: int = 25,
     device: torch.device = device
 ) -> List[float]:
-    """
-    Evaluate the model by calculating the mean squared error (MSE) between the solution and the model's predictions.
+    """Evaluate the model by calculating the mean squared error (MSE) between
+    the solution and the model's predictions.
 
     Args:
-        - model (torch.nn.Module): The model to be evaluated.
-        - solution (torch.Tensor): The target solution tensor.
-        - n (int): The dimension of the solution.
-        - bs (int): The batch size.
-        - total_itr (int): The total number of iterations for evaluation.
-        - device (torch.device, optional): The device to run the evaluation on. Defaults to device.
+      model: The model to be evaluated.
+      solution: The target solution tensor.
+      n: The dimension of the solution.
+      bs: The batch size.
+      total_itr: The total number of iterations for evaluation.
+      device: The device to run the evaluation on.
 
     Returns:
-        List[float]: A list of MSE values for each iteration.
+      A list of MSE values for each iteration.
     """
     norm_list = []
     for i in range(total_itr + 1):
@@ -72,45 +70,48 @@ def evaluate_model(
 
 
 class SORNet(nn.Module):
-    """Deep unfolded SOR with a constant step size.
+    """Deep unfolded SOR with a constant step size."""
 
-    Args:
-        - A (torch.Tensor): Matrix A of the linear system.
-        - H (torch.Tensor): Matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
-        - init_val_SORNet (float): Initial value for inv_omega.
-        - device (torch.device): Device to run the model on ('cpu' or 'cuda').
+    device: torch.device
+    """Device to run the model on."""
 
-    Attributes:
-        - device (torch.device): Device to run the model on.
-        - inv_omega (nn.Parameter): Inverse of the relaxation parameter omega.
-        - A (torch.Tensor): Matrix A of the linear system.
-        - D (torch.Tensor): Diagonal matrix D.
-        - L (torch.Tensor): Lower triangular matrix L.
-        - U (torch.Tensor): Upper triangular matrix U.
-        - H (torch.Tensor): Matrix H.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
-    
-    Methods:
-        forward(num_itr: int) -> Tuple[torch.Tensor, List[torch.Tensor]]:
-            Perform forward pass of the SORNet model.
-    """
+    inv_omega: nn.Parameter
+    """Inverse of the relaxation parameter omega."""
+
+    A: torch.Tensor
+    """Matrix $A$ of the linear system."""
+
+    D: torch.Tensor
+    """Diagonal matrix $D$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix $L$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix $U$."""
+
+    H: torch.Tensor
+    """Matrix $H$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution of the linear equation."""
 
     def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_SORNet:float=1.1, device: torch.device = device):
-        """
-        Initialize the SORNet model.
+        """Initialize the SORNet model.
 
         Args:
-            - A (torch.Tensor): Matrix A of the linear system.
-            - H (torch.Tensor): Matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution of the linear equation.
-            - init_val_SORNet (float): Initial value for inv_omega.
-            - device (torch.device): Device to run the model on ('cpu' or 'cuda').
-
+          A: Matrix $A$ of the linear system.
+          H: Matrix $H$.
+          bs: Batch size.
+          y: Solution of the linear equation.
+          init_val_SORNet: Initial value for `inv_omega`.
+          device: Device to run the model on ('cpu' or 'cuda').
         """
         super(SORNet, self).__init__()
         self.device = device
@@ -128,16 +129,15 @@ class SORNet(nn.Module):
         self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, List[torch.Tensor]]:
-        """
-        Perform forward pass of the SORNet model.
+        """Perform forward pass of the SORNet model.
 
         Args:
-            num_itr (int): Number of iterations.
+          num_itr: Number of iterations.
 
         Returns:
-            - torch.Tensor: Output tensor.
-            - list: List of intermediate results.
-
+          A tuple with the following contents:
+            - Output tensor.
+            - List of intermediate results.
         """
         traj = []
 
@@ -156,53 +156,57 @@ class SORNet(nn.Module):
 
 
 class SOR_CHEBY_Net(nn.Module):
-    """Deep unfolded SOR with Chebyshev acceleration.
+    """Deep unfolded SOR with Chebyshev acceleration."""
 
-    Args:
-        - num_itr (int): Number of iterations.
-        - A (torch.Tensor): Matrix A of the linear system.
-        - H (torch.Tensor): Matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
-        - init_val_SOR_CHEBY_Net_omega (float): Initial value for omega.
-        - init_val_SOR_CHEBY_Net_gamma (float): Initial value for gamma.
-        - init_val_SOR_CHEBY_Net_alpha (float): Initial value for inv_omega.
-        - device (torch.device): Device to run the model on ('cpu' or 'cuda').
+    device: torch.device
+    """Device to run the model on."""
 
-    Attributes:
-        - device (torch.device): Device to run the model on.
-        - gamma (nn.Parameter): Gamma parameter for each iteration.
-        - omega (nn.Parameter): Omega parameter for each iteration.
-        - inv_omega (nn.Parameter): Inverse of the relaxation parameter omega.
-        - A (torch.Tensor): Matrix A of the linear system.
-        - D (torch.Tensor): Diagonal matrix D.
-        - L (torch.Tensor): Lower triangular matrix L.
-        - U (torch.Tensor): Upper triangular matrix U.
-        - H (torch.Tensor): Matrix H.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
+    gamma: nn.Parameter
+    """Gamma parameter for each iteration."""
 
-    Methods:
-        forward(num_itr: int) -> Tuple[torch.Tensor, list[torch.Tensor]]:
-            Perform forward pass of the SOR_CHEBY_Net model.
-    """
+    omega: nn.Parameter
+    """Omega parameter for each iteration."""
+
+    inv_omega: nn.Parameter
+    """Inverse of the relaxation parameter omega."""
+
+    A: torch.Tensor
+    """Matrix $A$ of the linear system."""
+
+    D: torch.Tensor
+    """Diagonal matrix $D$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix $L$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix $U$."""
+
+    H: torch.Tensor
+    """Matrix $H$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution of the linear equation."""
 
     def __init__(self, num_itr: int, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_SOR_CHEBY_Net_omega: float = 0.6, init_val_SOR_CHEBY_Net_gamma: float = 0.8, init_val_SOR_CHEBY_Net_alpha: float = 0.9, device: torch.device = device):
-        """
-        Initialize the SOR_CHEBY_Net model.
+        """Initialize the SOR_CHEBY_Net model.
 
         Args:
-            - num_itr (int): Number of iterations.
-            - A (torch.Tensor): Matrix A of the linear system.
-            - H (torch.Tensor): Matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution of the linear equation.
-            - init_val_SOR_CHEBY_Net_omega (float): Initial value for omega.
-            - init_val_SOR_CHEBY_Net_gamma (float): Initial value for gamma.
-            - init_val_SOR_CHEBY_Net_alpha (float): Initial value for inv_omega.
-            - device (torch.device): Device to run the model on ('cpu' or 'cuda').
-
+          num_itr: Number of iterations.
+          A: Matrix $A$ of the linear system.
+          H: Matrix $H$.
+          bs: Batch size.
+          y: Solution of the linear equation.
+          init_val_SOR_CHEBY_Net_omega: Initial value for `omega`.
+          init_val_SOR_CHEBY_Net_gamma: Initial value for `gamma`.
+          init_val_SOR_CHEBY_Net_alpha: Initial value for `inv_omega`.
+          device: Device to run the model on ('cpu' or 'cuda').
         """
         super(SOR_CHEBY_Net, self).__init__()
         self.device = device
@@ -221,16 +225,15 @@ class SOR_CHEBY_Net(nn.Module):
         self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, List[torch.Tensor]]:
-        """
-        Perform forward pass of the SOR_CHEBY_Net model.
+        """Perform forward pass of the SOR_CHEBY_Net model.
 
         Args:
-            num_itr (int): Number of iterations.
+          num_itr: Number of iterations.
 
         Returns:
-            - torch.Tensor: Output tensor.
-            - list: List of intermediate results.
-
+          A tuple with the following contents:
+            - Output tensor.
+            - List of intermediate results.
         """
         traj = []
 
@@ -257,48 +260,54 @@ class SOR_CHEBY_Net(nn.Module):
 # =====================================================================================
 
 class AORNet(nn.Module):
-    """Deep unfolded AOR with a constant step size.
+    """Deep unfolded AOR with a constant step size."""
 
-    Args:
-        - A (torch.Tensor): Matrix A of the linear system.
-        - H (torch.Tensor): Matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
-        - init_val_AORNet_r (float): Initial value for r.
-        - init_val_AORNet_omega (float): Initial value for omega.
-        - device (torch.device): Device to run the model on ('cpu' or 'cuda').
+    device: torch.device
+    """Device to run the model on."""
 
-    Attributes:
-        - device (torch.device): Device to run the model on.
-        - r (nn.Parameter): Parameter r for AOR.
-        - omega (nn.Parameter): Relaxation parameter omega.
-        - A (torch.Tensor): Matrix A of the linear system.
-        - D (torch.Tensor): Diagonal matrix D.
-        - L (torch.Tensor): Lower triangular matrix L.
-        - U (torch.Tensor): Upper triangular matrix U.
-        - H (torch.Tensor): Matrix H.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
-    
-    Methods:
-        forward(num_itr: int) -> Tuple[torch.Tensor, list[torch.Tensor]]:
-            Perform forward pass of the AORNet model.
-    """
+    r: nn.Parameter
+    """Parameter `r` for AOR."""
+
+    omega: nn.Parameter
+    """Relaxation parameter omega."""
+
+    A: torch.Tensor
+    """Matrix $A$ of the linear system."""
+
+    D: torch.Tensor
+    """Diagonal matrix $D$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix $L$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix $U$."""
+
+    H: torch.Tensor
+    """Matrix $H$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution of the linear equation."""
+
 
     def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_AORNet_r: float = 0.9, init_val_AORNet_omega: float = 1.5, device: torch.device = device):
         """
         Initialize the AORNet model.
 
         Args:
-            - A (torch.Tensor): Matrix A of the linear system.
-            - H (torch.Tensor): Matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution of the linear equation.
-            - init_val_AORNet_r (float): Initial value for r.
-            - init_val_AORNet_omega (float): Initial value for omega.
-            - device (torch.device): Device to run the model on ('cpu' or 'cuda').
-
+          A: Matrix $A$ of the linear system.
+          H: Matrix $H$.
+          bs: Batch size.
+          y: Solution of the linear equation.
+          init_val_AORNet_r: Initial value for `r`.
+          init_val_AORNet_omega: Initial value for `omega`.
+          device: Device to run the model on ('cpu' or 'cuda').
         """
         super(AORNet, self).__init__()
         self.device = device
@@ -316,16 +325,15 @@ class AORNet(nn.Module):
         self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, list[torch.Tensor]]:
-        """
-        Perform forward pass of the AORNet model.
+        """Perform forward pass of the AORNet model.
 
         Args:
-            num_itr (int): Number of iterations.
+          num_itr: Number of iterations.
 
         Returns:
-            - torch.Tensor: Output tensor.
-            - list: List of intermediate results.
-
+          A tuple with the following contents:
+          - Output tensor.
+          - List of intermediate results.
         """
         traj = []
 
@@ -344,44 +352,46 @@ class AORNet(nn.Module):
 
 
 class RINet(nn.Module):
-    """Deep unfolded Richardson iteration.
+    """Deep unfolded Richardson iteration."""
 
-    Args:
-        - A (torch.Tensor): Matrix A of the linear system.
-        - H (torch.Tensor): Matrix H.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
-        - init_val_RINet (float): Initial value for inv_omega.
-        - device (torch.device): Device to run the model on ('cpu' or 'cuda').
+    inv_omega: nn.Parameter
+    """Inverse of the relaxation parameter omega."""
 
-    Attributes:
-        - inv_omega (nn.Parameter): Inverse of the relaxation parameter omega.
-        - A (torch.Tensor): Matrix A of the linear system.
-        - D (torch.Tensor): Diagonal matrix D.
-        - L (torch.Tensor): Lower triangular matrix L.
-        - U (torch.Tensor): Upper triangular matrix U.
-        - H (torch.Tensor): Matrix H.
-        - Dinv (torch.Tensor): Inverse of the diagonal matrix D.
-        - bs (int): Batch size.
-        - y (torch.Tensor): Solution of the linear equation.
+    A: torch.Tensor
+    """Matrix $A$ of the linear system."""
 
-    Methods:
-        forward(num_itr: int) -> Tuple[torch.Tensor, list[torch.Tensor]]:
-            Perform forward pass of the RINet model.
-    """
+    D: torch.Tensor
+    """Diagonal matrix $D$."""
+
+    L: torch.Tensor
+    """Lower triangular matrix $L$."""
+
+    U: torch.Tensor
+    """Upper triangular matrix $U$."""
+
+    H: torch.Tensor
+    """Matrix $H$."""
+
+    Dinv: torch.Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    bs: int
+    """Batch size."""
+
+    y: torch.Tensor
+    """Solution of the linear equation."""
+
 
     def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_RINet: float = 0.1, device: torch.device = device):
-        """
-        Initialize the RINet model.
+        """Initialize the RINet model.
 
         Args:
-            - A (torch.Tensor): Matrix A of the linear system.
-            - H (torch.Tensor): Matrix H.
-            - bs (int): Batch size.
-            - y (torch.Tensor): Solution of the linear equation.
-            - init_val_RINet (float): Initial value for inv_omega.
-            - device (torch.device): Device to run the model on ('cpu' or 'cuda').
-
+          A: Matrix $A$ of the linear system.
+          H: Matrix $H$.
+          bs: Batch size.
+          y: Solution of the linear equation.
+          init_val_RINet: Initial value for `inv_omega`.
+          device: Device to run the model on ('cpu' or 'cuda').
         """
         super(RINet, self).__init__()
         self.device = device
@@ -398,16 +408,15 @@ class RINet(nn.Module):
         self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> Tuple[torch.Tensor, list[torch.Tensor]]:
-        """
-        Perform forward pass of the RINet model.
+        """Perform forward pass of the RINet model.
 
         Args:
-            num_itr (int): Number of iterations.
+          num_itr: Number of iterations.
 
         Returns:
-            - torch.Tensor: Output tensor.
-            - list: List of intermediate results.
-
+          A tuple with the following contents:
+            - Output tensor.
+            - List of intermediate results.
         """
         traj = []
 
