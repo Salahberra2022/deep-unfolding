@@ -6,14 +6,14 @@
 import numpy as np
 import math
 import torch
-from typing import Tuple
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # GPU, if not CPU
 """The device where training will take place."""
 
 print(f"Code run on : {device}")
 
-def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, device: torch.device = device) -> Tuple[np.ndarray, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, device: torch.device = device) -> tuple[np.ndarray, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Generate matrices $A$, $H$, and $W$, as well as the solution and $y$.
 
     Args:
@@ -49,7 +49,7 @@ def generate_A_H_sol(n: int = 300, m: int = 600, seed: int = 12, bs: int = 10, d
 
     return A, H, W, solution, y
 
-def decompose_matrix(A: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def decompose_matrix(A: np.ndarray) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Decompose a given matrix into its diagonal, lower triangular, upper
     triangular components and their inverses.
 
