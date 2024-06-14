@@ -6,17 +6,18 @@
 
 import torch
 from numpy.typing import NDArray
+from torch import Tensor
 
 from .utils import decompose_matrix, device
 
 
 def model_iterations(
     model,
-    solution: torch.Tensor,
+    solution: Tensor,
     n: int,
     total_itr: int = 25,
     bs: int = 10000,
-) -> tuple[list[torch.Tensor], list[float]]:
+) -> tuple[list[Tensor], list[float]]:
     """Perform iterations using the provided model and calculate the error norm
       at each iteration.
 
@@ -53,34 +54,34 @@ class BaseModel:
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    def __init__(self, n: int, a: NDArray, h: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
         """Initialize the base_model with the given parameters and decompose matrix $A$.
 
         Args:
@@ -104,37 +105,37 @@ class GS(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
     num_itr: int
     """The number of Gauss-Seidel iterations to perform."""
 
-    def __init__(self, n: int, a: NDArray, h: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
         """Initialize the Gauss-Seidel solver.
 
         Args:
@@ -146,7 +147,7 @@ class GS(BaseModel):
         """
         super(GS, self).__init__(n, a, h, bs, y)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
           and trajectory of solutions.
 
@@ -179,34 +180,34 @@ class RI(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    def __init__(self, n: int, a: NDArray, h: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
         """Initialize the Richardson iteration solver.
 
         Args:
@@ -218,7 +219,7 @@ class RI(BaseModel):
         """
         super(RI, self).__init__(n, a, h, bs, y)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
           trajectory of solutions.
 
@@ -251,43 +252,43 @@ class Jacobi(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for Jacobi iterations."""
 
     def __init__(
         self,
         n: int,
         a: NDArray,
-        h: torch.Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         omega: float = 0.2,
     ):
         """Initialize the Jacobi iteration solver.
@@ -303,7 +304,7 @@ class Jacobi(BaseModel):
         super(Jacobi, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Jacobi iterations and returns the final solution and
           trajectory of solutions.
 
@@ -337,43 +338,43 @@ class SOR(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for SOR iterations."""
 
     def __init__(
         self,
         n: int,
         a: NDArray,
-        h: torch.Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         omega: float = 1.8,
     ):
         """Initialize the SOR solver.
@@ -389,7 +390,7 @@ class SOR(BaseModel):
         super(SOR, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the SOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -429,49 +430,49 @@ class SORCheby(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for SOR iterations."""
 
-    omegaa: torch.Tensor
+    omegaa: Tensor
     """Acceleration parameter for SOR-Chebyshev iterations."""
 
-    gamma: torch.Tensor
+    gamma: Tensor
     """Damping factor for SOR-Chebyshev iterations."""
 
     def __init__(
         self,
         n: int,
         a: NDArray,
-        h: torch.Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         omega: float = 1.8,
         omegaa: float = 0.8,
         gamma: float = 0.8,
@@ -493,7 +494,7 @@ class SORCheby(BaseModel):
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the SOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -545,46 +546,46 @@ class AOR(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for AOR iterations."""
 
-    r: torch.Tensor
+    r: Tensor
     """Relaxation parameter."""
 
     def __init__(
         self,
         n: int,
         a: NDArray,
-        h: torch.Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         omega: float = 0.3,
         r: float = 0.2,
     ):
@@ -603,7 +604,7 @@ class AOR(BaseModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the AOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -647,46 +648,46 @@ class AORCheby(BaseModel):
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for AOR iterations."""
 
-    r: torch.Tensor
+    r: Tensor
     """Relaxation parameter."""
 
     def __init__(
         self,
         n: int,
         a: NDArray,
-        h: torch.Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         omega: float = 0.1,
         r: float = 0.1,
     ):
@@ -705,7 +706,7 @@ class AORCheby(BaseModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the AOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 

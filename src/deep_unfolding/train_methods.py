@@ -6,6 +6,7 @@
 
 import torch
 import torch.nn as nn
+from torch import Tensor
 
 from .utils import decompose_matrix, device
 
@@ -14,7 +15,7 @@ def train_model(
     model: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
     loss_func: torch.nn.Module,
-    solution: torch.Tensor,
+    solution: Tensor,
     total_itr: int = 25,
     num_batch: int = 10000,
 ) -> tuple[torch.nn.Module, list[float]]:
@@ -48,7 +49,7 @@ def train_model(
 
 def evaluate_model(
     model: torch.nn.Module,
-    solution: torch.Tensor,
+    solution: Tensor,
     n: int,
     bs: int = 10000,
     total_itr: int = 25,
@@ -87,36 +88,36 @@ class SORNet(nn.Module):
     inv_omega: nn.Parameter
     """Inverse of the relaxation parameter omega."""
 
-    A: torch.Tensor
+    A: Tensor
     """Matrix $A$ of the linear system."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix $D$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix $L$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix $U$."""
 
-    H: torch.Tensor
+    H: Tensor
     """Matrix $H$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution of the linear equation."""
 
     def __init__(
         self,
-        a: torch.Tensor,
-        h: torch.Tensor,
+        a: Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         init_val_SORNet: float = 1.1,
         device: torch.device = device,
     ):
@@ -145,7 +146,7 @@ class SORNet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the SORNet model.
 
         Args:
@@ -187,37 +188,37 @@ class SORChebyNet(nn.Module):
     inv_omega: nn.Parameter
     """Inverse of the relaxation parameter omega."""
 
-    A: torch.Tensor
+    A: Tensor
     """Matrix $A$ of the linear system."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix $D$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix $L$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix $U$."""
 
-    H: torch.Tensor
+    H: Tensor
     """Matrix $H$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution of the linear equation."""
 
     def __init__(
         self,
         num_itr: int,
-        a: torch.Tensor,
-        h: torch.Tensor,
+        a: Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         init_val_SOR_CHEBY_Net_omega: float = 0.6,
         init_val_SOR_CHEBY_Net_gamma: float = 0.8,
         init_val_SOR_CHEBY_Net_alpha: float = 0.9,
@@ -258,7 +259,7 @@ class SORChebyNet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the SOR_CHEBY_Net model.
 
         Args:
@@ -312,36 +313,36 @@ class AORNet(nn.Module):
     omega: nn.Parameter
     """Relaxation parameter omega."""
 
-    A: torch.Tensor
+    A: Tensor
     """Matrix $A$ of the linear system."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix $D$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix $L$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix $U$."""
 
-    H: torch.Tensor
+    H: Tensor
     """Matrix $H$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution of the linear equation."""
 
     def __init__(
         self,
-        a: torch.Tensor,
-        h: torch.Tensor,
+        a: Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         init_val_AORNet_r: float = 0.9,
         init_val_AORNet_omega: float = 1.5,
         device: torch.device = device,
@@ -372,7 +373,7 @@ class AORNet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the AORNet model.
 
         Args:
@@ -411,36 +412,36 @@ class RINet(nn.Module):
     inv_omega: nn.Parameter
     """Inverse of the relaxation parameter omega."""
 
-    A: torch.Tensor
+    A: Tensor
     """Matrix $A$ of the linear system."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix $D$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix $L$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix $U$."""
 
-    H: torch.Tensor
+    H: Tensor
     """Matrix $H$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution of the linear equation."""
 
     def __init__(
         self,
-        a: torch.Tensor,
-        h: torch.Tensor,
+        a: Tensor,
+        h: Tensor,
         bs: int,
-        y: torch.Tensor,
+        y: Tensor,
         init_val_RINet: float = 0.1,
         device: torch.device = device,
     ):
@@ -468,7 +469,7 @@ class RINet(nn.Module):
         self.bs = bs
         self.y = y.to(device)
 
-    def forward(self, num_itr: int = 25) -> tuple[torch.Tensor, list[torch.Tensor]]:
+    def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the RINet model.
 
         Args:

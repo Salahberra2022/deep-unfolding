@@ -11,6 +11,7 @@ import math
 import numpy as np
 import torch
 from numpy.typing import NDArray
+from torch import Tensor
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if not CPU
 """The device where training will take place."""
@@ -24,7 +25,7 @@ def generate_A_H_sol(
     seed: int = 12,
     bs: int = 10,
     device: torch.device = device,
-) -> tuple[NDArray, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+) -> tuple[NDArray, Tensor, Tensor, Tensor, Tensor]:
     """Generate matrices $A$, $H$, and $W$, as well as the solution and $y$.
 
     Args:
@@ -47,7 +48,7 @@ def generate_A_H_sol(
     a = np.dot(h, h.T)
     eig = np.linalg.eig(a)[0]  # Eigenvalues
 
-    wt = torch.Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
+    wt = Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
     ht = torch.from_numpy(h).float().to(device)  # Define the appropriate 'device'
 
     print(
@@ -64,10 +65,8 @@ def generate_A_H_sol(
 
 
 def decompose_matrix(
-    a: NDArray | torch.Tensor,
-) -> tuple[
-    torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
-]:
+    a: NDArray | Tensor,
+) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
     """Decompose a given matrix into its diagonal, lower triangular, upper
     triangular components and their inverses.
 
@@ -91,11 +90,11 @@ def decompose_matrix(
     m_inv = np.linalg.inv(d + l)  # Inverse of the matrix (D + L)
 
     # Convert to Torch tensors and move to device
-    at = torch.Tensor(a).to(device)
-    dt = torch.Tensor(d).to(device)
-    lt = torch.Tensor(l).to(device)
-    ut = torch.Tensor(u).to(device)
-    dt_inv = torch.Tensor(d_inv).to(device)
-    mt_inv = torch.Tensor(m_inv).to(device)
+    at = Tensor(a).to(device)
+    dt = Tensor(d).to(device)
+    lt = Tensor(l).to(device)
+    ut = Tensor(u).to(device)
+    dt_inv = Tensor(d_inv).to(device)
+    mt_inv = Tensor(m_inv).to(device)
 
     return at, dt, lt, ut, dt_inv, mt_inv
