@@ -13,8 +13,8 @@ from deep_unfolding import (
     RI,
     SOR,
     SOR_CHEBY,
+    BaseModel,
     Jacobi,
-    base_model,
     decompose_matrix,
     device,
     model_iterations,
@@ -62,7 +62,7 @@ def test_model_iterations(generate_matrices, generate_solution):
 
 def test_base_model_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    model = base_model(n, A, H, bs, y)
+    model = BaseModel(n, A, H, bs, y)
 
     assert model.n == n, "Attribute n should be initialized correctly"
     assert model.H.shape == H.shape, "Attribute H should be initialized correctly"

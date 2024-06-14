@@ -12,7 +12,7 @@ __all__ = [
     "AOR",
     "AOR_CHEBY",
     "AORNet",
-    "base_model",
+    "BaseModel",
     "decompose_matrix",
     "device",
     "evaluate_model",
@@ -36,8 +36,8 @@ from deep_unfolding.methods import (
     RI,
     SOR,
     SOR_CHEBY,
+    BaseModel,
     Jacobi,
-    base_model,
     model_iterations,
 )
 from deep_unfolding.train_methods import (

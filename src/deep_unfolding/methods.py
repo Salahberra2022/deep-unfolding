@@ -2,7 +2,8 @@
 # Distributed under the the GNU General Public License (See accompanying file
 # LICENSE or copy at https://www.gnu.org/licenses/)
 
-import numpy as np
+"""This module contains conventional iterative methods."""
+
 import torch
 from numpy.typing import NDArray
 
@@ -46,7 +47,7 @@ def model_iterations(
     return s_hats, norm_list_model
 
 
-class base_model:
+class BaseModel:
     """Base model class for matrix decomposition and initialization."""
 
     n: int
@@ -97,7 +98,7 @@ class base_model:
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(A)
 
 
-class GS(base_model):
+class GS(BaseModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
 
     n: int
@@ -172,7 +173,7 @@ class GS(base_model):
         return s, traj
 
 
-class RI(base_model):
+class RI(BaseModel):
     """Class implementing the Richardson iteration algorithm for solving a linear system."""
 
     n: int
@@ -244,7 +245,7 @@ class RI(base_model):
         return s, traj
 
 
-class Jacobi(base_model):
+class Jacobi(BaseModel):
     """Class implementing the Jacobi iteration algorithm for solving a linear system."""
 
     n: int
@@ -329,7 +330,7 @@ class Jacobi(base_model):
         return s, traj
 
 
-class SOR(base_model):
+class SOR(BaseModel):
     """Class implementing the Successive Over-Relaxation (SOR) algorithm for
     solving a linear system."""
 
@@ -422,7 +423,7 @@ class SOR(base_model):
         return s, traj
 
 
-class SOR_CHEBY(base_model):
+class SOR_CHEBY(BaseModel):
     """Class implementing the SOR-Chebyshev algorithm for solving a linear system."""
 
     n: int
@@ -537,7 +538,7 @@ class SOR_CHEBY(base_model):
         return s_new, traj
 
 
-class AOR(base_model):
+class AOR(BaseModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
     solving a linear system."""
 
@@ -639,7 +640,7 @@ class AOR(base_model):
         return s, traj
 
 
-class AOR_CHEBY(base_model):
+class AOR_CHEBY(BaseModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
     acceleration algorithm for solving a linear system."""
 

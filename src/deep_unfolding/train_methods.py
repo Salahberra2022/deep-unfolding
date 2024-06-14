@@ -2,6 +2,8 @@
 # Distributed under the the GNU General Public License (See accompanying file
 # LICENSE or copy at https://www.gnu.org/licenses/)
 
+"""This module includes deep unfolding versions of the conventional iterative methods."""
+
 import torch
 import torch.nn as nn
 
