@@ -9,7 +9,7 @@ import torch.nn as nn
 from deep_unfolding import (
     AORNet,
     RINet,
-    SOR_CHEBY_Net,
+    SORChebyNet,
     SORNet,
     device,
     evaluate_model,
@@ -60,7 +60,7 @@ def test_SORNet_forward(generate_matrices):
 def test_SOR_CHEBY_Net_initialization(generate_matrices):
     num_itr = 25
     A, H, y, n, m, bs, solution = generate_matrices
-    model = SOR_CHEBY_Net(num_itr, A, H, bs, y, device=device)
+    model = SORChebyNet(num_itr, A, H, bs, y, device=device)
 
     assert model.A.shape == (n, n), "Attribute A should have the correct shape"
     assert model.H.shape == (n, m), "Attribute H should have the correct shape"
@@ -85,7 +85,7 @@ def test_SOR_CHEBY_Net_initialization(generate_matrices):
 def test_SOR_CHEBY_Net_forward(generate_matrices):
     num_itr = 3
     A, H, y, n, m, bs, solution = generate_matrices
-    model = SOR_CHEBY_Net(num_itr, A, H, bs, y, device=device)
+    model = SORChebyNet(num_itr, A, H, bs, y, device=device)
 
     s, traj = model.forward(num_itr=num_itr)
 

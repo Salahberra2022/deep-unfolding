@@ -2,7 +2,7 @@
 # Distributed under the the GNU General Public License (See accompanying file
 # LICENSE or copy at https://www.gnu.org/licenses/)
 
-"""This module includes deep unfolding versions of the conventional iterative methods."""
+"""Deep unfolding versions of the conventional iterative methods."""
 
 import torch
 import torch.nn as nn
@@ -113,8 +113,8 @@ class SORNet(nn.Module):
 
     def __init__(
         self,
-        A: torch.Tensor,
-        H: torch.Tensor,
+        a: torch.Tensor,
+        h: torch.Tensor,
         bs: int,
         y: torch.Tensor,
         init_val_SORNet: float = 1.1,
@@ -123,8 +123,8 @@ class SORNet(nn.Module):
         """Initialize the SORNet model.
 
         Args:
-          A: Matrix $A$ of the linear system.
-          H: Matrix $H$.
+          a: Matrix $A$ of the linear system.
+          h: Matrix $H$.
           bs: Batch size.
           y: Solution of the linear equation.
           init_val_SORNet: Initial value for `inv_omega`.
@@ -134,14 +134,14 @@ class SORNet(nn.Module):
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_SORNet, device=device))
 
-        A, D, L, U, _, _ = decompose_matrix(A)
+        a, d, l, u, _, _ = decompose_matrix(a)
 
-        self.A = A.to(device)
-        self.D = D.to(device)
-        self.L = L.to(device)
-        self.U = U.to(device)
-        self.H = H.to(device)
-        self.Dinv = torch.linalg.inv(D).to(device)
+        self.A = a.to(device)
+        self.D = d.to(device)
+        self.L = l.to(device)
+        self.U = u.to(device)
+        self.H = h.to(device)
+        self.Dinv = torch.linalg.inv(d).to(device)
         self.bs = bs
         self.y = y.to(device)
 
@@ -158,7 +158,7 @@ class SORNet(nn.Module):
         """
         traj = []
 
-        invM = torch.linalg.inv(self.inv_omega * self.D + self.L)
+        m_inv = torch.linalg.inv(self.inv_omega * self.D + self.L)
         s = torch.zeros(self.bs, self.H.size(0), device=self.device)
         traj.append(s)
         yMF = torch.matmul(self.y, self.H.T)
@@ -166,13 +166,13 @@ class SORNet(nn.Module):
 
         for _ in range(num_itr):
             temp = torch.matmul(s, (self.inv_omega - 1) * self.D - self.U) + yMF
-            s = torch.matmul(temp, invM)
+            s = torch.matmul(temp, m_inv)
             traj.append(s)
 
         return s, traj
 
 
-class SOR_CHEBY_Net(nn.Module):
+class SORChebyNet(nn.Module):
     """Deep unfolded SOR with Chebyshev acceleration."""
 
     device: torch.device
@@ -214,8 +214,8 @@ class SOR_CHEBY_Net(nn.Module):
     def __init__(
         self,
         num_itr: int,
-        A: torch.Tensor,
-        H: torch.Tensor,
+        a: torch.Tensor,
+        h: torch.Tensor,
         bs: int,
         y: torch.Tensor,
         init_val_SOR_CHEBY_Net_omega: float = 0.6,
@@ -227,8 +227,8 @@ class SOR_CHEBY_Net(nn.Module):
 
         Args:
           num_itr: Number of iterations.
-          A: Matrix $A$ of the linear system.
-          H: Matrix $H$.
+          a: Matrix $A$ of the linear system.
+          h: Matrix $H$.
           bs: Batch size.
           y: Solution of the linear equation.
           init_val_SOR_CHEBY_Net_omega: Initial value for `omega`.
@@ -236,7 +236,7 @@ class SOR_CHEBY_Net(nn.Module):
           init_val_SOR_CHEBY_Net_alpha: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super(SOR_CHEBY_Net, self).__init__()
+        super(SORChebyNet, self).__init__()
         self.device = device
         self.gamma = nn.Parameter(
             init_val_SOR_CHEBY_Net_gamma * torch.ones(num_itr, device=device)
@@ -248,13 +248,13 @@ class SOR_CHEBY_Net(nn.Module):
             torch.tensor(init_val_SOR_CHEBY_Net_alpha, device=device)
         )
 
-        A, D, L, U, _, _ = decompose_matrix(A)
-        self.A = A
-        self.D = D.to(device)
-        self.L = L.to(device)
-        self.U = U.to(device)
-        self.H = H.to(device)
-        self.Dinv = torch.linalg.inv(D).to(device)
+        a, d, l, u, _, _ = decompose_matrix(a)
+        self.A = a
+        self.D = d.to(device)
+        self.L = l.to(device)
+        self.U = u.to(device)
+        self.H = h.to(device)
+        self.Dinv = torch.linalg.inv(d).to(device)
         self.bs = bs
         self.y = y.to(device)
 
@@ -271,7 +271,7 @@ class SOR_CHEBY_Net(nn.Module):
         """
         traj = []
 
-        invM = torch.linalg.inv(self.inv_omega * self.D + self.L)
+        m_inv = torch.linalg.inv(self.inv_omega * self.D + self.L)
         s = torch.zeros(self.bs, self.H.size(0), device=self.device)  # modif to size(0)
         s_new = torch.zeros(
             self.bs, self.H.size(0), device=self.device
@@ -284,7 +284,7 @@ class SOR_CHEBY_Net(nn.Module):
 
         for i in range(num_itr):
             temp = torch.matmul(s, (self.inv_omega - 1) * self.D - self.U) + yMF
-            s = torch.matmul(temp, invM)
+            s = torch.matmul(temp, m_inv)
 
             s_new = (
                 self.omega[i] * (self.gamma[i] * (s - s_present) + (s_present - s_old))
@@ -338,20 +338,19 @@ class AORNet(nn.Module):
 
     def __init__(
         self,
-        A: torch.Tensor,
-        H: torch.Tensor,
+        a: torch.Tensor,
+        h: torch.Tensor,
         bs: int,
         y: torch.Tensor,
         init_val_AORNet_r: float = 0.9,
         init_val_AORNet_omega: float = 1.5,
         device: torch.device = device,
     ):
-        """
-        Initialize the AORNet model.
+        """Initialize the AORNet model.
 
         Args:
-          A: Matrix $A$ of the linear system.
-          H: Matrix $H$.
+          a: Matrix $A$ of the linear system.
+          h: Matrix $H$.
           bs: Batch size.
           y: Solution of the linear equation.
           init_val_AORNet_r: Initial value for `r`.
@@ -363,13 +362,13 @@ class AORNet(nn.Module):
         self.r = nn.Parameter(torch.tensor(init_val_AORNet_r, device=device))
         self.omega = nn.Parameter(torch.tensor(init_val_AORNet_omega, device=device))
 
-        A, D, L, U, _, _ = decompose_matrix(A)
-        self.A = A.to(device)
-        self.D = D.to(device)
-        self.L = L.to(device)
-        self.U = U.to(device)
-        self.H = H.to(device)
-        self.Dinv = torch.linalg.inv(D).to(device)
+        a, d, l, u, _, _ = decompose_matrix(a)
+        self.A = a.to(device)
+        self.D = d.to(device)
+        self.L = l.to(device)
+        self.U = u.to(device)
+        self.H = h.to(device)
+        self.Dinv = torch.linalg.inv(d).to(device)
         self.bs = bs
         self.y = y.to(device)
 
@@ -386,8 +385,8 @@ class AORNet(nn.Module):
         """
         traj = []
 
-        invM = torch.linalg.inv(self.L - self.r * self.D)
-        N = (
+        m_inv = torch.linalg.inv(self.L - self.r * self.D)
+        n = (
             (1 - self.omega) * self.D
             + (self.omega - self.r) * self.L
             + self.omega * self.U
@@ -400,7 +399,7 @@ class AORNet(nn.Module):
         s = torch.matmul(yMF, self.Dinv)
 
         for _ in range(num_itr):
-            s = torch.matmul(s, torch.matmul(invM, N)) + torch.matmul(yMF, invM)
+            s = torch.matmul(s, torch.matmul(m_inv, n)) + torch.matmul(yMF, m_inv)
             traj.append(s)
 
         return s, traj
@@ -438,8 +437,8 @@ class RINet(nn.Module):
 
     def __init__(
         self,
-        A: torch.Tensor,
-        H: torch.Tensor,
+        a: torch.Tensor,
+        h: torch.Tensor,
         bs: int,
         y: torch.Tensor,
         init_val_RINet: float = 0.1,
@@ -448,8 +447,8 @@ class RINet(nn.Module):
         """Initialize the RINet model.
 
         Args:
-          A: Matrix $A$ of the linear system.
-          H: Matrix $H$.
+          a: Matrix $A$ of the linear system.
+          h: Matrix $H$.
           bs: Batch size.
           y: Solution of the linear equation.
           init_val_RINet: Initial value for `inv_omega`.
@@ -459,13 +458,13 @@ class RINet(nn.Module):
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_RINet, device=device))
 
-        A, D, L, U, _, _ = decompose_matrix(A)
-        self.A = A.to(device)
-        self.D = D.to(device)
-        self.L = L.to(device)
-        self.U = U.to(device)
-        self.H = H.to(device)
-        self.Dinv = torch.linalg.inv(D).to(device)
+        a, d, l, u, _, _ = decompose_matrix(a)
+        self.A = a.to(device)
+        self.D = d.to(device)
+        self.L = l.to(device)
+        self.U = u.to(device)
+        self.H = h.to(device)
+        self.Dinv = torch.linalg.inv(d).to(device)
         self.bs = bs
         self.y = y.to(device)
 

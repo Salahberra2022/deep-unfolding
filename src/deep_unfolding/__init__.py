@@ -10,7 +10,7 @@ __docformat__ = "google"
 
 __all__ = [
     "AOR",
-    "AOR_CHEBY",
+    "AORCheby",
     "AORNet",
     "BaseModel",
     "decompose_matrix",
@@ -23,27 +23,27 @@ __all__ = [
     "RI",
     "RINet",
     "SOR",
-    "SOR_CHEBY",
-    "SOR_CHEBY_Net",
+    "SORCheby",
+    "SORChebyNet",
     "SORNet",
     "train_model",
 ]
 
 from deep_unfolding.methods import (
     AOR,
-    AOR_CHEBY,
     GS,
     RI,
     SOR,
-    SOR_CHEBY,
+    AORCheby,
     BaseModel,
     Jacobi,
+    SORCheby,
     model_iterations,
 )
 from deep_unfolding.train_methods import (
     AORNet,
     RINet,
-    SOR_CHEBY_Net,
+    SORChebyNet,
     SORNet,
     evaluate_model,
     train_model,

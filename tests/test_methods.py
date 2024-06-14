@@ -8,13 +8,13 @@ import torch
 
 from deep_unfolding import (
     AOR,
-    AOR_CHEBY,
     GS,
     RI,
     SOR,
-    SOR_CHEBY,
+    AORCheby,
     BaseModel,
     Jacobi,
+    SORCheby,
     decompose_matrix,
     device,
     model_iterations,
@@ -275,7 +275,7 @@ def test_SOR_iteration(generate_matrices):
 
 def test_SOR_CHEBY_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    sor_cheby_model = SOR_CHEBY(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
+    sor_cheby_model = SORCheby(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
 
     assert (
         sor_cheby_model.n == n
@@ -322,7 +322,7 @@ def test_SOR_CHEBY_initialization(generate_matrices):
 
 def test_SOR_CHEBY_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    sor_cheby_model = SOR_CHEBY(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
+    sor_cheby_model = SORCheby(n, A, H, bs, y, omega=1.8, omegaa=0.8, gamma=0.8)
 
     s, traj = sor_cheby_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
@@ -382,7 +382,7 @@ def test_AOR_iteration(generate_matrices):
 
 def test_AOR_CHEBY_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    aor_cheby_model = AOR_CHEBY(n, A, H, bs, y, omega=0.1, r=0.1)
+    aor_cheby_model = AORCheby(n, A, H, bs, y, omega=0.1, r=0.1)
 
     assert (
         aor_cheby_model.n == n
@@ -426,7 +426,7 @@ def test_AOR_CHEBY_initialization(generate_matrices):
 
 def test_AOR_CHEBY_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    aor_cheby_model = AOR_CHEBY(n, A, H, bs, y, omega=0.1, r=0.1)
+    aor_cheby_model = AORCheby(n, A, H, bs, y, omega=0.1, r=0.1)
 
     s, traj = aor_cheby_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"

@@ -2,6 +2,8 @@
 # Distributed under the the GNU General Public License (See accompanying file
 # LICENSE or copy at https://www.gnu.org/licenses/)
 
+"""Utility functions."""
+
 from __future__ import annotations
 
 import math
@@ -41,12 +43,12 @@ def generate_A_H_sol(
         - Tensor $y$ resulting from `solution @ H` of shape (`bs`, `m`)
     """
     np.random.seed(seed=seed)
-    H: NDArray = np.random.normal(0, 1.0 / math.sqrt(n), (n, m))
-    A = np.dot(H, H.T)
-    eig = np.linalg.eig(A)[0]  # Eigenvalues
+    h = np.random.normal(0, 1.0 / math.sqrt(n), (n, m))
+    a = np.dot(h, h.T)
+    eig = np.linalg.eig(a)[0]  # Eigenvalues
 
-    Wt = torch.Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
-    Ht = torch.from_numpy(H).float().to(device)  # Define the appropriate 'device'
+    wt = torch.Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
+    ht = torch.from_numpy(h).float().to(device)  # Define the appropriate 'device'
 
     print(
         f"""
@@ -56,13 +58,13 @@ def generate_A_H_sol(
     )
 
     solution = torch.normal(torch.zeros(bs, n), 1.0).to(device).detach()
-    y = solution @ Ht.detach()
+    y = solution @ ht.detach()
 
-    return A, Ht, Wt, solution, y
+    return a, ht, wt, solution, y
 
 
 def decompose_matrix(
-    A: NDArray | torch.Tensor,
+    a: NDArray | torch.Tensor,
 ) -> tuple[
     torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
 ]:
@@ -70,7 +72,7 @@ def decompose_matrix(
     triangular components and their inverses.
 
     Args:
-      A: Input square matrix to decompose.
+      a: Input square matrix to decompose.
 
     Returns:
       A tuple with the following contents:
@@ -82,18 +84,18 @@ def decompose_matrix(
         - $M^{-1}$: Inverse of the matrix $D + L$.
     """
     # Decomposed matrix calculations
-    D = np.diag(np.diag(A))  # Diagonal matrix
-    L = np.tril(A, -1)  # Lower triangular matrix
-    U = np.triu(A, 1)  # Upper triangular matrix
-    Dinv = np.linalg.inv(D)  # Inverse of the diagonal matrix
-    invM = np.linalg.inv(D + L)  # Inverse of the matrix (D + L)
+    d = np.diag(np.diag(a))  # Diagonal matrix
+    l = np.tril(a, -1)  # Lower triangular matrix
+    u = np.triu(a, 1)  # Upper triangular matrix
+    d_inv = np.linalg.inv(d)  # Inverse of the diagonal matrix
+    m_inv = np.linalg.inv(d + l)  # Inverse of the matrix (D + L)
 
     # Convert to Torch tensors and move to device
-    At = torch.Tensor(A).to(device)
-    Dt = torch.Tensor(D).to(device)
-    Lt = torch.Tensor(L).to(device)
-    Ut = torch.Tensor(U).to(device)
-    Dtinv = torch.Tensor(Dinv).to(device)
-    Mtinv = torch.Tensor(invM).to(device)
+    at = torch.Tensor(a).to(device)
+    dt = torch.Tensor(d).to(device)
+    lt = torch.Tensor(l).to(device)
+    ut = torch.Tensor(u).to(device)
+    dt_inv = torch.Tensor(d_inv).to(device)
+    mt_inv = torch.Tensor(m_inv).to(device)
 
-    return At, Dt, Lt, Ut, Dtinv, Mtinv
+    return at, dt, lt, ut, dt_inv, mt_inv
