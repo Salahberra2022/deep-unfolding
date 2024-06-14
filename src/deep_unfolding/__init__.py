@@ -1,6 +1,6 @@
 # Copyright (c) 2023-2024 Salah Berra and contributors
-# Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
-# at https://www.gnu.org/licenses/)
+# Distributed under the the GNU General Public License (See accompanying file
+# LICENSE or copy at https://www.gnu.org/licenses/)
 
 """
 .. include:: ../../README.md
@@ -10,9 +10,9 @@ __docformat__ = "google"
 
 __all__ = [
     "AOR",
-    "AOR_CHEBY",
+    "AORCheby",
     "AORNet",
-    "base_model",
+    "BaseModel",
     "decompose_matrix",
     "device",
     "evaluate_model",
@@ -23,33 +23,29 @@ __all__ = [
     "RI",
     "RINet",
     "SOR",
-    "SOR_CHEBY",
-    "SOR_CHEBY_Net",
+    "SORCheby",
+    "SORChebyNet",
     "SORNet",
     "train_model",
 ]
 
 from deep_unfolding.methods import (
     AOR,
-    AOR_CHEBY,
-    base_model,
     GS,
-    Jacobi,
-    model_iterations,
     RI,
     SOR,
-    SOR_CHEBY,
+    AORCheby,
+    BaseModel,
+    Jacobi,
+    SORCheby,
+    model_iterations,
 )
 from deep_unfolding.train_methods import (
     AORNet,
-    evaluate_model,
     RINet,
+    SORChebyNet,
     SORNet,
-    SOR_CHEBY_Net,
+    evaluate_model,
     train_model,
 )
-from deep_unfolding.utils import (
-    decompose_matrix,
-    device,
-    generate_A_H_sol,
-)
+from deep_unfolding.utils import decompose_matrix, device, generate_A_H_sol

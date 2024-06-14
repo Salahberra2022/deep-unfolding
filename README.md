@@ -56,14 +56,14 @@ This package implements various iterative techniques for approximating the solut
 - **RI**: Richardson iteration algorithm
 - **Jacobi**: Jacobi iteration (RI) algorithm
 - **SOR**: Successive Over-Relaxation (SOR) algorithm
-- **SOR_CHEBY**: Successive Over-Relaxation (SOR) with Chebyshev acceleration algorithm
+- **SORCheby**: Successive Over-Relaxation (SOR) with Chebyshev acceleration algorithm
 - **AOR**: Accelerated Over-Relaxation (AOR) algorithm
-- **AOR_CHEBY**: Accelerated Over-Relaxation (AOR) with Chebyshev acceleration algorithm
+- **AORCheby**: Accelerated Over-Relaxation (AOR) with Chebyshev acceleration algorithm
 
 This package also implements several models based on **Deep Unfolding Learning**, enabling optimization of the parameters of some of the preceding algorithms to obtain an optimal approximation. The models implemented in the module `train_methods` are:
 
 - **SORNet**: Optimization via Deep Unfolding Learning of the Successive Over-Relaxation (SOR) algorithm
-- **SOR_CHEBY_Net**: Optimization via Deep Unfolding Learning of the Successive Over-Relaxation (SOR) with Chebyshev acceleration algorithm
+- **SORChebyNet**: Optimization via Deep Unfolding Learning of the Successive Over-Relaxation (SOR) with Chebyshev acceleration algorithm
 - **AORNet**: Optimization via Deep Unfolding Learning of the Accelerated Over-Relaxation (AOR) algorithm
 - **RINet**: Optimization via Deep Unfolding Learning of the Richardson iteration (RI) algorithm
 

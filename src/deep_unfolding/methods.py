@@ -1,20 +1,23 @@
-# Copyright (c) 2022-2024 Salah Berra and contributors
-# Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
-# at https://www.gnu.org/licenses/)
+# Copyright (c) 2023-2024 Salah Berra and contributors
+# Distributed under the the GNU General Public License (See accompanying file
+# LICENSE or copy at https://www.gnu.org/licenses/)
+
+"""Conventional iterative methods."""
 
 import torch
-import numpy as np
 from numpy.typing import NDArray
-from .utils import device, decompose_matrix
+from torch import Tensor
+
+from .utils import decompose_matrix, device
 
 
 def model_iterations(
     model,
-    solution: torch.Tensor,
+    solution: Tensor,
     n: int,
     total_itr: int = 25,
     bs: int = 10000,
-) -> tuple[list[torch.Tensor], list[float]]:
+) -> tuple[list[Tensor], list[float]]:
     """Perform iterations using the provided model and calculate the error norm
       at each iteration.
 
@@ -35,114 +38,116 @@ def model_iterations(
 
     for i in range(total_itr + 1):
         s_hat, _ = model.iterate(i)
-        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (n * bs)
+        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+            n * bs
+        )
 
         s_hats.append(s_hat)
         norm_list_model.append(err)
 
     return s_hats, norm_list_model
 
-class base_model:
+
+class BaseModel:
     """Base model class for matrix decomposition and initialization."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
         """Initialize the base_model with the given parameters and decompose matrix $A$.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix $H$.
+          a: Input square matrix to decompose.
+          h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
         """
         self.n = n
-        self.H = H
+        self.H = h
         self.bs = bs
         self.y = y
 
-        self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(A)
+        self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(a)
 
-class GS(base_model):
+
+class GS(BaseModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
     num_itr: int
     """The number of Gauss-Seidel iterations to perform."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
         """Initialize the Gauss-Seidel solver.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix H.
+          a: Input square matrix to decompose.
+          h: Random matrix H.
           bs: Batch size.
           y: Solution tensor.
         """
-        super(GS, self).__init__(n, A, H, bs, y)
+        super(GS, self).__init__(n, a, h, bs, y)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
           and trajectory of solutions.
 
@@ -161,60 +166,60 @@ class GS(base_model):
         yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
         s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
-        for i in range(num_itr):
+        for _ in range(num_itr):
             temp = -torch.matmul(s, self.U) + yMF
             s = torch.matmul(temp, self.Minv)
             traj.append(s)
 
         return s, traj
 
-class RI(base_model):
+
+class RI(BaseModel):
     """Class implementing the Richardson iteration algorithm for solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
         """Initialize the Richardson iteration solver.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix $H$.
+          a: Input square matrix to decompose.
+          h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
         """
-        super(RI, self).__init__(n, A, H, bs, y)
+        super(RI, self).__init__(n, a, h, bs, y)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
           trajectory of solutions.
 
@@ -234,64 +239,72 @@ class RI(base_model):
         yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
         s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
-        for i in range(num_itr):
+        for _ in range(num_itr):
             s = s + torch.mul(omega, (yMF - torch.matmul(s, self.A)))
             traj.append(s)
 
         return s, traj
 
-class Jacobi(base_model):
+
+class Jacobi(BaseModel):
     """Class implementing the Jacobi iteration algorithm for solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for Jacobi iterations."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.2):
+    def __init__(
+        self,
+        n: int,
+        a: NDArray,
+        h: Tensor,
+        bs: int,
+        y: Tensor,
+        omega: float = 0.2,
+    ):
         """Initialize the Jacobi iteration solver.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix $H$.
+          a: Input square matrix to decompose.
+          h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
           omega: Relaxation parameter for Jacobi iterations.
         """
-        super(Jacobi, self).__init__(n, A, H, bs, y)
+        super(Jacobi, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Jacobi iterations and returns the final solution and
           trajectory of solutions.
 
@@ -310,52 +323,60 @@ class Jacobi(base_model):
         yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
         s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
-        for i in range(num_itr):
+        for _ in range(num_itr):
             temp = torch.matmul(self.Dinv, (self.D - self.A))
             s = torch.matmul(s, temp) + torch.matmul(yMF, self.Dinv)
             traj.append(s)
 
         return s, traj
 
-class SOR(base_model):
+
+class SOR(BaseModel):
     """Class implementing the Successive Over-Relaxation (SOR) algorithm for
-      solving a linear system."""
+    solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for SOR iterations."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8):
+    def __init__(
+        self,
+        n: int,
+        a: NDArray,
+        h: Tensor,
+        bs: int,
+        y: Tensor,
+        omega: float = 1.8,
+    ):
         """Initialize the SOR solver.
 
         Args:
@@ -366,10 +387,10 @@ class SOR(base_model):
           y: Solution tensor.
           omega: Relaxation parameter for SOR iterations.
         """
-        super(SOR, self).__init__(n, A, H, bs, y)
+        super(SOR, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the SOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -385,7 +406,7 @@ class SOR(base_model):
         n = self.y.size(1)
 
         inv_omega = torch.div(1, self.omega)
-        invM_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
+        m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
 
         s = torch.zeros(self.bs, n).to(device)
         traj.append(s)
@@ -393,76 +414,87 @@ class SOR(base_model):
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
 
-        for i in range(num_itr):
+        for _ in range(num_itr):
             temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
-            s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(yMF, invM_sor)
+            s = torch.matmul(s, torch.matmul(m_inv_sor, temp)) + torch.matmul(
+                yMF, m_inv_sor
+            )
             traj.append(s)
 
         return s, traj
 
 
-class SOR_CHEBY(base_model):
+class SORCheby(BaseModel):
     """Class implementing the SOR-Chebyshev algorithm for solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for SOR iterations."""
 
-    omegaa: torch.Tensor
+    omegaa: Tensor
     """Acceleration parameter for SOR-Chebyshev iterations."""
 
-    gamma: torch.Tensor
+    gamma: Tensor
     """Damping factor for SOR-Chebyshev iterations."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8, omegaa: float = 0.8, gamma: float = 0.8):
+    def __init__(
+        self,
+        n: int,
+        a: NDArray,
+        h: Tensor,
+        bs: int,
+        y: Tensor,
+        omega: float = 1.8,
+        omegaa: float = 0.8,
+        gamma: float = 0.8,
+    ):
         """Initialize the SOR-Chebyshev solver.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix $H$.
+          a: Input square matrix to decompose.
+          h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
           omega: Relaxation parameter for SOR iterations.
           omegaa: Acceleration parameter for SOR-Chebyshev iterations.
           gamma: Damping factor for SOR-Chebyshev iterations.
         """
-        super(SOR_CHEBY, self).__init__(n, A, H, bs, y)
+        super(SORCheby, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the SOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -477,7 +509,7 @@ class SOR_CHEBY(base_model):
         traj = []
 
         inv_omega = torch.div(1, self.omega)
-        invM_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
+        m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
 
         s = torch.zeros(self.bs, self.n).to(device)
         s_new = torch.zeros(self.bs, self.n).to(device)
@@ -489,11 +521,16 @@ class SOR_CHEBY(base_model):
         s_present = s
         s_old = torch.zeros(s_present.shape).to(device)
 
-        for i in range(num_itr):
+        for _ in range(num_itr):
             temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
-            s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(yMF, invM_sor)
+            s = torch.matmul(s, torch.matmul(m_inv_sor, temp)) + torch.matmul(
+                yMF, m_inv_sor
+            )
 
-            s_new = self.omegaa * (self.gamma * (s - s_present) + (s_present - s_old)) + s_old
+            s_new = (
+                self.omegaa * (self.gamma * (s - s_present) + (s_present - s_old))
+                + s_old
+            )
             s_old = s
             s_present = s_new
 
@@ -501,64 +538,73 @@ class SOR_CHEBY(base_model):
 
         return s_new, traj
 
-class AOR(base_model):
+
+class AOR(BaseModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
-      solving a linear system."""
+    solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for AOR iterations."""
 
-    r: torch.Tensor
+    r: Tensor
     """Relaxation parameter."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.3, r: float = 0.2):
+    def __init__(
+        self,
+        n: int,
+        a: NDArray,
+        h: Tensor,
+        bs: int,
+        y: Tensor,
+        omega: float = 0.3,
+        r: float = 0.2,
+    ):
         """Initialize the AOR solver.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix $H$.
+          a: Input square matrix to decompose.
+          h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
           omega: Relaxation parameter for AOR iterations.
           r: Relaxation parameter.
         """
-        super(AOR, self).__init__(n, A, H, bs, y)
+        super(AOR, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the AOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -572,9 +618,13 @@ class AOR(base_model):
         """
         traj = []
 
-        M = (self.D - torch.mul(self.r, self.L))
-        invM_aor = torch.linalg.inv(M)
-        N = (torch.mul((1 - self.omega), self.D) + torch.mul((self.omega - self.r), self.L) + torch.mul(self.omega, self.U))
+        m = self.D - torch.mul(self.r, self.L)
+        m_inv_aor = torch.linalg.inv(m)
+        n = (
+            torch.mul((1 - self.omega), self.D)
+            + torch.mul((self.omega - self.r), self.L)
+            + torch.mul(self.omega, self.U)
+        )
 
         s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
@@ -582,71 +632,81 @@ class AOR(base_model):
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
 
-        for i in range(num_itr):
-            s = torch.matmul(s, torch.matmul(invM_aor, N)) + torch.mul(self.omega, torch.matmul(yMF, invM_aor))
+        for _ in range(num_itr):
+            s = torch.matmul(s, torch.matmul(m_inv_aor, n)) + torch.mul(
+                self.omega, torch.matmul(yMF, m_inv_aor)
+            )
             traj.append(s)
 
         return s, traj
 
 
-class AOR_CHEBY(base_model):
+class AORCheby(BaseModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
-      acceleration algorithm for solving a linear system."""
+    acceleration algorithm for solving a linear system."""
 
     n: int
     """Dimension of the solution."""
 
-    H: torch.Tensor
+    H: Tensor
     """Random matrix $H$."""
 
     bs: int
     """Batch size."""
 
-    y: torch.Tensor
+    y: Tensor
     """Solution tensor."""
 
-    A: torch.Tensor
+    A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: torch.Tensor
+    D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: torch.Tensor
+    L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: torch.Tensor
+    U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: torch.Tensor
+    Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: torch.Tensor
+    Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    omega: torch.Tensor
+    omega: Tensor
     """Relaxation parameter for AOR iterations."""
 
-    r: torch.Tensor
+    r: Tensor
     """Relaxation parameter."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.1, r: float = 0.1):
+    def __init__(
+        self,
+        n: int,
+        a: NDArray,
+        h: Tensor,
+        bs: int,
+        y: Tensor,
+        omega: float = 0.1,
+        r: float = 0.1,
+    ):
         """Initialize the AOR-Chebyshev solver.
 
         Args:
           n: Dimension of the solution.
-          A: Input square matrix to decompose.
-          H: Random matrix $H$.
+          a: Input square matrix to decompose.
+          h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
           omega: Relaxation parameter for AOR iterations.
           r: Relaxation parameter.
         """
-        super(AOR_CHEBY, self).__init__(n, A, H, bs, y)
+        super(AORCheby, self).__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def iterate(self, num_itr: int = 25) -> tuple[torch.Tensor, list]:
+    def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the AOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -666,32 +726,40 @@ class AOR_CHEBY(base_model):
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
 
-        Y0 = s
+        y0 = s
 
-        M = (self.D - torch.mul(self.r, self.L))
-        invM = torch.linalg.inv(M)
-        N = (torch.mul((1 - self.omega), self.D) + torch.mul((self.omega - self.r), self.L) + torch.mul(self.omega, self.U))
-        temp = torch.matmul(invM, N)
+        m = self.D - torch.mul(self.r, self.L)
+        m_inv = torch.linalg.inv(m)
+        n = (
+            torch.mul((1 - self.omega), self.D)
+            + torch.mul((self.omega - self.r), self.L)
+            + torch.mul(self.omega, self.U)
+        )
+        temp = torch.matmul(m_inv, n)
 
         rho = torch.tensor(0.1)
         mu0 = torch.tensor(1)
         mu1 = rho
-        xhat1 = torch.matmul(s, temp) + self.omega * torch.matmul(yMF, invM)
-        Y1 = xhat1
-        Y = Y1
+        xhat1 = torch.matmul(s, temp) + self.omega * torch.matmul(yMF, m_inv)
+        y1 = xhat1
+        y = y1
 
-        for i in range(num_itr):
+        for _ in range(num_itr):
             f = 2 / (rho * mu1)
             j = 1 / mu0
             c = f - j
             mu = 1 / c
             a = (2 * mu) / (rho * mu1)
-            Y = torch.matmul((Y1 * a), torch.matmul(invM, N)) - (((mu / mu0)) * Y0) + (a * torch.matmul(yMF, invM))
-            Y0 = Y1
-            Y1 = Y
+            y = (
+                torch.matmul((y1 * a), torch.matmul(m_inv, n))
+                - (((mu / mu0)) * y0)
+                + (a * torch.matmul(yMF, m_inv))
+            )
+            y0 = y1
+            y1 = y
             mu0 = mu1
             mu1 = mu
 
-            traj.append(Y)
+            traj.append(y)
 
-        return Y, traj
+        return y, traj
