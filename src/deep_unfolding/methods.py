@@ -2,10 +2,11 @@
 # Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
 # at https://www.gnu.org/licenses/)
 
-import torch
 import numpy as np
+import torch
 from numpy.typing import NDArray
-from .utils import device, decompose_matrix
+
+from .utils import decompose_matrix, device
 
 
 def model_iterations(
@@ -35,12 +36,15 @@ def model_iterations(
 
     for i in range(total_itr + 1):
         s_hat, _ = model.iterate(i)
-        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (n * bs)
+        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+            n * bs
+        )
 
         s_hats.append(s_hat)
         norm_list_model.append(err)
 
     return s_hats, norm_list_model
+
 
 class base_model:
     """Base model class for matrix decomposition and initialization."""
@@ -75,7 +79,6 @@ class base_model:
     Minv: torch.Tensor
     """Inverse of the matrix $D + L$."""
 
-
     def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
         """Initialize the base_model with the given parameters and decompose matrix $A$.
 
@@ -92,6 +95,7 @@ class base_model:
         self.y = y
 
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(A)
+
 
 class GS(base_model):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
@@ -128,7 +132,6 @@ class GS(base_model):
 
     num_itr: int
     """The number of Gauss-Seidel iterations to perform."""
-
 
     def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
         """Initialize the Gauss-Seidel solver.
@@ -168,6 +171,7 @@ class GS(base_model):
 
         return s, traj
 
+
 class RI(base_model):
     """Class implementing the Richardson iteration algorithm for solving a linear system."""
 
@@ -200,7 +204,6 @@ class RI(base_model):
 
     Minv: torch.Tensor
     """Inverse of the matrix $D + L$."""
-
 
     def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor):
         """Initialize the Richardson iteration solver.
@@ -240,6 +243,7 @@ class RI(base_model):
 
         return s, traj
 
+
 class Jacobi(base_model):
     """Class implementing the Jacobi iteration algorithm for solving a linear system."""
 
@@ -276,8 +280,15 @@ class Jacobi(base_model):
     omega: torch.Tensor
     """Relaxation parameter for Jacobi iterations."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.2):
+    def __init__(
+        self,
+        n: int,
+        A: NDArray,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        omega: float = 0.2,
+    ):
         """Initialize the Jacobi iteration solver.
 
         Args:
@@ -317,9 +328,10 @@ class Jacobi(base_model):
 
         return s, traj
 
+
 class SOR(base_model):
     """Class implementing the Successive Over-Relaxation (SOR) algorithm for
-      solving a linear system."""
+    solving a linear system."""
 
     n: int
     """Dimension of the solution."""
@@ -354,8 +366,15 @@ class SOR(base_model):
     omega: torch.Tensor
     """Relaxation parameter for SOR iterations."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8):
+    def __init__(
+        self,
+        n: int,
+        A: NDArray,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        omega: float = 1.8,
+    ):
         """Initialize the SOR solver.
 
         Args:
@@ -395,7 +414,9 @@ class SOR(base_model):
 
         for i in range(num_itr):
             temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
-            s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(yMF, invM_sor)
+            s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(
+                yMF, invM_sor
+            )
             traj.append(s)
 
         return s, traj
@@ -443,8 +464,17 @@ class SOR_CHEBY(base_model):
     gamma: torch.Tensor
     """Damping factor for SOR-Chebyshev iterations."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 1.8, omegaa: float = 0.8, gamma: float = 0.8):
+    def __init__(
+        self,
+        n: int,
+        A: NDArray,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        omega: float = 1.8,
+        omegaa: float = 0.8,
+        gamma: float = 0.8,
+    ):
         """Initialize the SOR-Chebyshev solver.
 
         Args:
@@ -491,9 +521,14 @@ class SOR_CHEBY(base_model):
 
         for i in range(num_itr):
             temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
-            s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(yMF, invM_sor)
+            s = torch.matmul(s, torch.matmul(invM_sor, temp)) + torch.matmul(
+                yMF, invM_sor
+            )
 
-            s_new = self.omegaa * (self.gamma * (s - s_present) + (s_present - s_old)) + s_old
+            s_new = (
+                self.omegaa * (self.gamma * (s - s_present) + (s_present - s_old))
+                + s_old
+            )
             s_old = s
             s_present = s_new
 
@@ -501,9 +536,10 @@ class SOR_CHEBY(base_model):
 
         return s_new, traj
 
+
 class AOR(base_model):
     """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
-      solving a linear system."""
+    solving a linear system."""
 
     n: int
     """Dimension of the solution."""
@@ -541,8 +577,16 @@ class AOR(base_model):
     r: torch.Tensor
     """Relaxation parameter."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.3, r: float = 0.2):
+    def __init__(
+        self,
+        n: int,
+        A: NDArray,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        omega: float = 0.3,
+        r: float = 0.2,
+    ):
         """Initialize the AOR solver.
 
         Args:
@@ -572,9 +616,13 @@ class AOR(base_model):
         """
         traj = []
 
-        M = (self.D - torch.mul(self.r, self.L))
+        M = self.D - torch.mul(self.r, self.L)
         invM_aor = torch.linalg.inv(M)
-        N = (torch.mul((1 - self.omega), self.D) + torch.mul((self.omega - self.r), self.L) + torch.mul(self.omega, self.U))
+        N = (
+            torch.mul((1 - self.omega), self.D)
+            + torch.mul((self.omega - self.r), self.L)
+            + torch.mul(self.omega, self.U)
+        )
 
         s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
@@ -583,7 +631,9 @@ class AOR(base_model):
         s = torch.matmul(yMF, self.Dinv)
 
         for i in range(num_itr):
-            s = torch.matmul(s, torch.matmul(invM_aor, N)) + torch.mul(self.omega, torch.matmul(yMF, invM_aor))
+            s = torch.matmul(s, torch.matmul(invM_aor, N)) + torch.mul(
+                self.omega, torch.matmul(yMF, invM_aor)
+            )
             traj.append(s)
 
         return s, traj
@@ -591,7 +641,7 @@ class AOR(base_model):
 
 class AOR_CHEBY(base_model):
     """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
-      acceleration algorithm for solving a linear system."""
+    acceleration algorithm for solving a linear system."""
 
     n: int
     """Dimension of the solution."""
@@ -629,8 +679,16 @@ class AOR_CHEBY(base_model):
     r: torch.Tensor
     """Relaxation parameter."""
 
-
-    def __init__(self, n: int, A: NDArray, H: torch.Tensor, bs: int, y: torch.Tensor, omega: float = 0.1, r: float = 0.1):
+    def __init__(
+        self,
+        n: int,
+        A: NDArray,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        omega: float = 0.1,
+        r: float = 0.1,
+    ):
         """Initialize the AOR-Chebyshev solver.
 
         Args:
@@ -668,9 +726,13 @@ class AOR_CHEBY(base_model):
 
         Y0 = s
 
-        M = (self.D - torch.mul(self.r, self.L))
+        M = self.D - torch.mul(self.r, self.L)
         invM = torch.linalg.inv(M)
-        N = (torch.mul((1 - self.omega), self.D) + torch.mul((self.omega - self.r), self.L) + torch.mul(self.omega, self.U))
+        N = (
+            torch.mul((1 - self.omega), self.D)
+            + torch.mul((self.omega - self.r), self.L)
+            + torch.mul(self.omega, self.U)
+        )
         temp = torch.matmul(invM, N)
 
         rho = torch.tensor(0.1)
@@ -686,7 +748,11 @@ class AOR_CHEBY(base_model):
             c = f - j
             mu = 1 / c
             a = (2 * mu) / (rho * mu1)
-            Y = torch.matmul((Y1 * a), torch.matmul(invM, N)) - (((mu / mu0)) * Y0) + (a * torch.matmul(yMF, invM))
+            Y = (
+                torch.matmul((Y1 * a), torch.matmul(invM, N))
+                - (((mu / mu0)) * Y0)
+                + (a * torch.matmul(yMF, invM))
+            )
             Y0 = Y1
             Y1 = Y
             mu0 = mu1

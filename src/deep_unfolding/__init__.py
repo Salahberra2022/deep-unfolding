@@ -32,24 +32,20 @@ __all__ = [
 from deep_unfolding.methods import (
     AOR,
     AOR_CHEBY,
-    base_model,
     GS,
-    Jacobi,
-    model_iterations,
     RI,
     SOR,
     SOR_CHEBY,
+    Jacobi,
+    base_model,
+    model_iterations,
 )
 from deep_unfolding.train_methods import (
     AORNet,
-    evaluate_model,
     RINet,
-    SORNet,
     SOR_CHEBY_Net,
+    SORNet,
+    evaluate_model,
     train_model,
 )
-from deep_unfolding.utils import (
-    decompose_matrix,
-    device,
-    generate_A_H_sol,
-)
+from deep_unfolding.utils import decompose_matrix, device, generate_A_H_sol

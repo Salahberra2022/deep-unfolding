@@ -1,6 +1,7 @@
-from .utils import device, decompose_matrix
 import torch
 import torch.nn as nn
+
+from .utils import decompose_matrix, device
 
 
 def train_model(
@@ -9,7 +10,7 @@ def train_model(
     loss_func: torch.nn.Module,
     solution: torch.Tensor,
     total_itr: int = 25,
-    num_batch: int = 10000
+    num_batch: int = 10000,
 ) -> tuple[torch.nn.Module, list[float]]:
     """Train the given model using the specified optimizer and loss function.
 
@@ -45,7 +46,7 @@ def evaluate_model(
     n: int,
     bs: int = 10000,
     total_itr: int = 25,
-    device: torch.device = device
+    device: torch.device = device,
 ) -> list[float]:
     """Evaluate the model by calculating the mean squared error (MSE) between
       the solution and the model's predictions.
@@ -64,7 +65,9 @@ def evaluate_model(
     norm_list = []
     for i in range(total_itr + 1):
         s_hat, _ = model(i)
-        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (n * bs)
+        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+            n * bs
+        )
         norm_list.append(err)
     return norm_list
 
@@ -102,7 +105,15 @@ class SORNet(nn.Module):
     y: torch.Tensor
     """Solution of the linear equation."""
 
-    def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_SORNet:float=1.1, device: torch.device = device):
+    def __init__(
+        self,
+        A: torch.Tensor,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        init_val_SORNet: float = 1.1,
+        device: torch.device = device,
+    ):
         """Initialize the SORNet model.
 
         Args:
@@ -194,7 +205,18 @@ class SOR_CHEBY_Net(nn.Module):
     y: torch.Tensor
     """Solution of the linear equation."""
 
-    def __init__(self, num_itr: int, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_SOR_CHEBY_Net_omega: float = 0.6, init_val_SOR_CHEBY_Net_gamma: float = 0.8, init_val_SOR_CHEBY_Net_alpha: float = 0.9, device: torch.device = device):
+    def __init__(
+        self,
+        num_itr: int,
+        A: torch.Tensor,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        init_val_SOR_CHEBY_Net_omega: float = 0.6,
+        init_val_SOR_CHEBY_Net_gamma: float = 0.8,
+        init_val_SOR_CHEBY_Net_alpha: float = 0.9,
+        device: torch.device = device,
+    ):
         """Initialize the SOR_CHEBY_Net model.
 
         Args:
@@ -210,9 +232,15 @@ class SOR_CHEBY_Net(nn.Module):
         """
         super(SOR_CHEBY_Net, self).__init__()
         self.device = device
-        self.gamma = nn.Parameter(init_val_SOR_CHEBY_Net_gamma * torch.ones(num_itr, device=device))
-        self.omega = nn.Parameter(init_val_SOR_CHEBY_Net_omega * torch.ones(num_itr, device=device))
-        self.inv_omega = nn.Parameter(torch.tensor(init_val_SOR_CHEBY_Net_alpha, device=device))
+        self.gamma = nn.Parameter(
+            init_val_SOR_CHEBY_Net_gamma * torch.ones(num_itr, device=device)
+        )
+        self.omega = nn.Parameter(
+            init_val_SOR_CHEBY_Net_omega * torch.ones(num_itr, device=device)
+        )
+        self.inv_omega = nn.Parameter(
+            torch.tensor(init_val_SOR_CHEBY_Net_alpha, device=device)
+        )
 
         A, D, L, U, _, _ = decompose_matrix(A)
         self.A = A
@@ -238,8 +266,10 @@ class SOR_CHEBY_Net(nn.Module):
         traj = []
 
         invM = torch.linalg.inv(self.inv_omega * self.D + self.L)
-        s = torch.zeros(self.bs, self.H.size(0), device=self.device) # modif to size(0)
-        s_new = torch.zeros(self.bs, self.H.size(0), device=self.device) # modif to size(0)
+        s = torch.zeros(self.bs, self.H.size(0), device=self.device)  # modif to size(0)
+        s_new = torch.zeros(
+            self.bs, self.H.size(0), device=self.device
+        )  # modif to size(0)
         traj.append(s)
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
@@ -250,14 +280,19 @@ class SOR_CHEBY_Net(nn.Module):
             temp = torch.matmul(s, (self.inv_omega - 1) * self.D - self.U) + yMF
             s = torch.matmul(temp, invM)
 
-            s_new = self.omega[i] * (self.gamma[i] * (s - s_present) + (s_present - s_old)) + s_old
+            s_new = (
+                self.omega[i] * (self.gamma[i] * (s - s_present) + (s_present - s_old))
+                + s_old
+            )
             s_old = s
             s_present = s_new
             traj.append(s_new)
 
         return s_new, traj
 
+
 # =====================================================================================
+
 
 class AORNet(nn.Module):
     """Deep unfolded AOR with a constant step size."""
@@ -295,7 +330,16 @@ class AORNet(nn.Module):
     y: torch.Tensor
     """Solution of the linear equation."""
 
-    def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_AORNet_r: float = 0.9, init_val_AORNet_omega: float = 1.5, device: torch.device = device):
+    def __init__(
+        self,
+        A: torch.Tensor,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        init_val_AORNet_r: float = 0.9,
+        init_val_AORNet_omega: float = 1.5,
+        device: torch.device = device,
+    ):
         """
         Initialize the AORNet model.
 
@@ -337,8 +381,14 @@ class AORNet(nn.Module):
         traj = []
 
         invM = torch.linalg.inv(self.L - self.r * self.D)
-        N = (1 - self.omega) * self.D + (self.omega - self.r) * self.L + self.omega * self.U
-        s = torch.zeros(self.bs, self.H.size(0), device=self.device) # change to size(0)
+        N = (
+            (1 - self.omega) * self.D
+            + (self.omega - self.r) * self.L
+            + self.omega * self.U
+        )
+        s = torch.zeros(
+            self.bs, self.H.size(0), device=self.device
+        )  # change to size(0)
         traj.append(s)
         yMF = torch.matmul(self.y, self.H.T)
         s = torch.matmul(yMF, self.Dinv)
@@ -380,8 +430,15 @@ class RINet(nn.Module):
     y: torch.Tensor
     """Solution of the linear equation."""
 
-
-    def __init__(self, A: torch.Tensor, H: torch.Tensor, bs: int, y: torch.Tensor, init_val_RINet: float = 0.1, device: torch.device = device):
+    def __init__(
+        self,
+        A: torch.Tensor,
+        H: torch.Tensor,
+        bs: int,
+        y: torch.Tensor,
+        init_val_RINet: float = 0.1,
+        device: torch.device = device,
+    ):
         """Initialize the RINet model.
 
         Args:
