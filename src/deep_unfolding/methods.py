@@ -1,6 +1,6 @@
-# Copyright (c) 2022-2024 Salah Berra and contributors
-# Distributed under the the GNU General Public License (See accompanying file LICENSE or copy
-# at https://www.gnu.org/licenses/)
+# Copyright (c) 2023-2024 Salah Berra and contributors
+# Distributed under the the GNU General Public License (See accompanying file
+# LICENSE or copy at https://www.gnu.org/licenses/)
 
 import numpy as np
 import torch
