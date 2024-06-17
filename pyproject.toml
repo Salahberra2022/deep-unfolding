@@ -28,7 +28,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering"
 ]
-dependencies = [ "numpy >= 1.26", "torch >= 2.3" ]
+dependencies = [ "numpy >= 1.26, < 2", "torch >= 2.3" ]
 
 [project.urls]
 "Homepage" = "https://github.com/Salahberra2022/deep_unfolding"
