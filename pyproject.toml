@@ -31,9 +31,9 @@ classifiers = [
 dependencies = [ "numpy >= 1.26, < 2", "torch >= 2.3" ]
 
 [project.urls]
-"Homepage" = "https://github.com/Salahberra2022/deep_unfolding"
-"Bug Tracker" = "https://github.com/Salahberra2022/deep_unfolding/issues"
-"Documentation" = "https://Salahberra2022.github.io/deep_unfolding/"
+"Homepage" = "https://github.com/Salahberra2022/deep-unfolding"
+"Bug Tracker" = "https://github.com/Salahberra2022/deep-unfolding/issues"
+"Documentation" = "https://Salahberra2022.github.io/deep-unfolding/"
 
 [project.optional-dependencies]
 dev = [
