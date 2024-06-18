@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "deep-unfolding"
 description = "Deep unfolding of iterative methods to solve linear equations"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
     { name = "Salah Berra", email = "salahberra39@gmail.com" },
     { name = "Nennouche Mohamed", email = "moohaameed.nennouche@gmail.com" },
