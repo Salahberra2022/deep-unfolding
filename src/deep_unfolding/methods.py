@@ -145,7 +145,7 @@ class GS(BaseModel):
           bs: Batch size.
           y: Solution tensor.
         """
-        super(GS, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
@@ -217,7 +217,7 @@ class RI(BaseModel):
           bs: Batch size.
           y: Solution tensor.
         """
-        super(RI, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
@@ -301,7 +301,7 @@ class Jacobi(BaseModel):
           y: Solution tensor.
           omega: Relaxation parameter for Jacobi iterations.
         """
-        super(Jacobi, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
@@ -387,7 +387,7 @@ class SOR(BaseModel):
           y: Solution tensor.
           omega: Relaxation parameter for SOR iterations.
         """
-        super(SOR, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
@@ -489,7 +489,7 @@ class SORCheby(BaseModel):
           omegaa: Acceleration parameter for SOR-Chebyshev iterations.
           gamma: Damping factor for SOR-Chebyshev iterations.
         """
-        super(SORCheby, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
@@ -600,7 +600,7 @@ class AOR(BaseModel):
           omega: Relaxation parameter for AOR iterations.
           r: Relaxation parameter.
         """
-        super(AOR, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
@@ -702,7 +702,7 @@ class AORCheby(BaseModel):
           omega: Relaxation parameter for AOR iterations.
           r: Relaxation parameter.
         """
-        super(AORCheby, self).__init__(n, a, h, bs, y)
+        super().__init__(n, a, h, bs, y)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
