@@ -406,7 +406,7 @@ class AORNet(nn.Module):
         return s, traj
 
 
-class RINet(nn.Module):
+class RichardsonNet(nn.Module):
     """Deep unfolded Richardson iteration."""
 
     inv_omega: nn.Parameter
@@ -455,7 +455,7 @@ class RINet(nn.Module):
           init_val_RINet: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super(RINet, self).__init__()
+        super(RichardsonNet, self).__init__()
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_RINet, device=device))
 

@@ -48,7 +48,7 @@ def model_iterations(
     return s_hats, norm_list_model
 
 
-class BaseModel:
+class IterativeModel:
     """Base model class for matrix decomposition and initialization."""
 
     n: int
@@ -99,7 +99,7 @@ class BaseModel:
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(a)
 
 
-class GS(BaseModel):
+class GaussSeidel(IterativeModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
 
     n: int
@@ -145,7 +145,7 @@ class GS(BaseModel):
           bs: Batch size.
           y: Solution tensor.
         """
-        super(GS, self).__init__(n, a, h, bs, y)
+        super(GaussSeidel, self).__init__(n, a, h, bs, y)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
@@ -174,7 +174,7 @@ class GS(BaseModel):
         return s, traj
 
 
-class RI(BaseModel):
+class Richardson(IterativeModel):
     """Class implementing the Richardson iteration algorithm for solving a linear system."""
 
     n: int
@@ -217,7 +217,7 @@ class RI(BaseModel):
           bs: Batch size.
           y: Solution tensor.
         """
-        super(RI, self).__init__(n, a, h, bs, y)
+        super(Richardson, self).__init__(n, a, h, bs, y)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
@@ -246,7 +246,7 @@ class RI(BaseModel):
         return s, traj
 
 
-class Jacobi(BaseModel):
+class Jacobi(IterativeModel):
     """Class implementing the Jacobi iteration algorithm for solving a linear system."""
 
     n: int
@@ -331,7 +331,7 @@ class Jacobi(BaseModel):
         return s, traj
 
 
-class SOR(BaseModel):
+class SOR(IterativeModel):
     """Class implementing the Successive Over-Relaxation (SOR) algorithm for
     solving a linear system."""
 
@@ -424,7 +424,7 @@ class SOR(BaseModel):
         return s, traj
 
 
-class SORCheby(BaseModel):
+class SORCheby(IterativeModel):
     """Class implementing the SOR-Chebyshev algorithm for solving a linear system."""
 
     n: int
@@ -539,7 +539,7 @@ class SORCheby(BaseModel):
         return s_new, traj
 
 
-class AOR(BaseModel):
+class AOR(IterativeModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
     solving a linear system."""
 
@@ -641,7 +641,7 @@ class AOR(BaseModel):
         return s, traj
 
 
-class AORCheby(BaseModel):
+class AORCheby(IterativeModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
     acceleration algorithm for solving a linear system."""
 
