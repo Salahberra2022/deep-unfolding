@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from .utils import decompose_matrix, device
+from .utils import _decompose_matrix, device
 
 
 def train_model(
@@ -135,7 +135,7 @@ class SORNet(nn.Module):
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_SORNet, device=device))
 
-        a, d, l, u, _, _ = decompose_matrix(a)
+        a, d, l, u, _, _ = _decompose_matrix(a)
 
         self.A = a.to(device)
         self.D = d.to(device)
@@ -249,7 +249,7 @@ class SORChebyNet(nn.Module):
             torch.tensor(init_val_SOR_CHEBY_Net_alpha, device=device)
         )
 
-        a, d, l, u, _, _ = decompose_matrix(a)
+        a, d, l, u, _, _ = _decompose_matrix(a)
         self.A = a
         self.D = d.to(device)
         self.L = l.to(device)
@@ -363,7 +363,7 @@ class AORNet(nn.Module):
         self.r = nn.Parameter(torch.tensor(init_val_AORNet_r, device=device))
         self.omega = nn.Parameter(torch.tensor(init_val_AORNet_omega, device=device))
 
-        a, d, l, u, _, _ = decompose_matrix(a)
+        a, d, l, u, _, _ = _decompose_matrix(a)
         self.A = a.to(device)
         self.D = d.to(device)
         self.L = l.to(device)
@@ -459,7 +459,7 @@ class RichardsonNet(nn.Module):
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_RINet, device=device))
 
-        a, d, l, u, _, _ = decompose_matrix(a)
+        a, d, l, u, _, _ = _decompose_matrix(a)
         self.A = a.to(device)
         self.D = d.to(device)
         self.L = l.to(device)

@@ -13,7 +13,7 @@ __all__ = [
     "AORCheby",
     "AORNet",
     "BaseModel",
-    "decompose_matrix",
+    "_decompose_matrix",
     "device",
     "evaluate_model",
     "generate_A_H_sol",
@@ -48,4 +48,4 @@ from deep_unfolding.unfolding_solvers import (
     evaluate_model,
     train_model,
 )
-from deep_unfolding.utils import decompose_matrix, device, generate_A_H_sol
+from deep_unfolding.utils import _decompose_matrix, device, generate_A_H_sol

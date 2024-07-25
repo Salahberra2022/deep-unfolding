@@ -8,7 +8,7 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-from .utils import decompose_matrix, device
+from .utils import _decompose_matrix, device
 
 
 def model_iterations(
@@ -96,7 +96,7 @@ class IterativeModel:
         self.bs = bs
         self.y = y
 
-        self.A, self.D, self.L, self.U, self.Dinv, self.Minv = decompose_matrix(a)
+        self.A, self.D, self.L, self.U, self.Dinv, self.Minv = _decompose_matrix(a)
 
 
 class GaussSeidel(IterativeModel):

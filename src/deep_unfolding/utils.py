@@ -64,7 +64,7 @@ def generate_A_H_sol(
     return a, ht, wt, solution, y
 
 
-def decompose_matrix(
+def _decompose_matrix(
     a: NDArray | Tensor,
 ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
     """Decompose a given matrix into its diagonal, lower triangular, upper

@@ -15,7 +15,7 @@ from deep_unfolding import (
     BaseModel,
     Jacobi,
     SORCheby,
-    decompose_matrix,
+    _decompose_matrix,
     device,
     model_iterations,
 )
@@ -69,7 +69,7 @@ def test_base_model_initialization(generate_matrices):
     assert model.bs == bs, "Attribute bs should be initialized correctly"
     assert model.y.shape == y.shape, "Attribute y should be initialized correctly"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         model.A, A_torch
     ), "Attribute A should match the decomposed matrix"
@@ -97,7 +97,7 @@ def test_GS_initialization(generate_matrices):
         gs_model.y.shape == y.shape
     ), "Attribute y should be initialized correctly in GS model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         gs_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in GS model"
@@ -145,7 +145,7 @@ def test_RI_initialization(generate_matrices):
         ri_model.y.shape == y.shape
     ), "Attribute y should be initialized correctly in RI model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         ri_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in RI model"
@@ -195,7 +195,7 @@ def test_Jacobi_initialization(generate_matrices):
         0.2
     ), "Attribute omega should be initialized correctly in Jacobi model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         jacobi_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in Jacobi model"
@@ -243,7 +243,7 @@ def test_SOR_initialization(generate_matrices):
         1.8
     ), "Attribute omega should be initialized correctly in SOR model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         sor_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in SOR model"
@@ -299,7 +299,7 @@ def test_SOR_CHEBY_initialization(generate_matrices):
         0.8
     ), "Attribute gamma should be initialized correctly in SOR_CHEBY model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         sor_cheby_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in SOR_CHEBY model"
@@ -350,7 +350,7 @@ def test_AOR_initialization(generate_matrices):
         0.2
     ), "Attribute r should be initialized correctly in AOR model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         aor_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in AOR model"
@@ -403,7 +403,7 @@ def test_AOR_CHEBY_initialization(generate_matrices):
         0.1
     ), "Attribute r should be initialized correctly in AOR_CHEBY model"
 
-    A_torch, D, L, U, Dinv, Minv = decompose_matrix(A)
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
         aor_cheby_model.A, A_torch
     ), "Attribute A should match the decomposed matrix in AOR_CHEBY model"
