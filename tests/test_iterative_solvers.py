@@ -16,7 +16,7 @@ from deep_unfolding import (
     Jacobi,
     SORCheby,
     _decompose_matrix,
-    device,
+    _device,
     model_iterations,
 )
 
@@ -27,8 +27,8 @@ def generate_matrices():
     m = 600
     bs = 10
     A = np.random.rand(n, n)
-    H = torch.from_numpy(np.random.rand(n, m)).float().to(device)
-    y = torch.from_numpy(np.random.rand(bs, m)).float().to(device)
+    H = torch.from_numpy(np.random.rand(n, m)).float().to(_device)
+    y = torch.from_numpy(np.random.rand(bs, m)).float().to(_device)
     return n, A, H, bs, y
 
 
@@ -36,7 +36,7 @@ def generate_matrices():
 def generate_solution():
     bs = 10
     n = 300
-    return torch.from_numpy(np.random.rand(bs, n)).float().to(device)
+    return torch.from_numpy(np.random.rand(bs, n)).float().to(_device)
 
 
 def test_model_iterations(generate_matrices, generate_solution):

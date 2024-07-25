@@ -13,10 +13,10 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if not CPU
+_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if not CPU
 """The device where training will take place."""
 
-print(f"Code run on : {device}")
+print(f"Code run on : {_device}")
 
 
 def gen_linear(
@@ -24,7 +24,7 @@ def gen_linear(
     m: int = 600,
     seed: int = 12,
     bs: int = 10,
-    device: torch.device = device,
+    device: torch.device = _device,
 ) -> tuple[NDArray, Tensor, Tensor, Tensor, Tensor]:
     """Generate matrices $A$, $H$, and $W$, as well as the solution and $y$.
 
@@ -66,12 +66,14 @@ def gen_linear(
 
 def _decompose_matrix(
     a: NDArray | Tensor,
+    device: torch.device = _device,
 ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
     """Decompose a given matrix into its diagonal, lower triangular, upper
     triangular components and their inverses.
 
     Args:
       a: Input square matrix to decompose.
+      device: Device to run the computations on.
 
     Returns:
       A tuple with the following contents:

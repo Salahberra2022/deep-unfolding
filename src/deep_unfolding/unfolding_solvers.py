@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from .utils import _decompose_matrix, device
+from .utils import _decompose_matrix, _device
 
 
 def train_model(
@@ -53,7 +53,7 @@ def evaluate_model(
     n: int,
     bs: int = 10000,
     total_itr: int = 25,
-    device: torch.device = device,
+    device: torch.device = _device,
 ) -> list[float]:
     """Evaluate the model by calculating the mean squared error (MSE) between
       the solution and the model's predictions.
@@ -119,7 +119,7 @@ class SORNet(nn.Module):
         bs: int,
         y: Tensor,
         init_val_SORNet: float = 1.1,
-        device: torch.device = device,
+        device: torch.device = _device,
     ):
         """Initialize the SORNet model.
 
@@ -222,7 +222,7 @@ class SORChebyNet(nn.Module):
         init_val_SOR_CHEBY_Net_omega: float = 0.6,
         init_val_SOR_CHEBY_Net_gamma: float = 0.8,
         init_val_SOR_CHEBY_Net_alpha: float = 0.9,
-        device: torch.device = device,
+        device: torch.device = _device,
     ):
         """Initialize the SOR_CHEBY_Net model.
 
@@ -345,7 +345,7 @@ class AORNet(nn.Module):
         y: Tensor,
         init_val_AORNet_r: float = 0.9,
         init_val_AORNet_omega: float = 1.5,
-        device: torch.device = device,
+        device: torch.device = _device,
     ):
         """Initialize the AORNet model.
 
@@ -443,7 +443,7 @@ class RichardsonNet(nn.Module):
         bs: int,
         y: Tensor,
         init_val_RINet: float = 0.1,
-        device: torch.device = device,
+        device: torch.device = _device,
     ):
         """Initialize the RINet model.
 

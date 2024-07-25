@@ -14,9 +14,9 @@ __all__ = [
     "AORNet",
     "BaseModel",
     "_decompose_matrix",
-    "device",
+    "_device",
     "evaluate_model",
-    "generate_A_H_sol",
+    "gen_linear",
     "GaussSeidel",
     "Jacobi",
     "model_iterations",
@@ -48,4 +48,4 @@ from deep_unfolding.unfolding_solvers import (
     evaluate_model,
     train_model,
 )
-from deep_unfolding.utils import _decompose_matrix, device, gen_linear
+from deep_unfolding.utils import _decompose_matrix, _device, gen_linear
