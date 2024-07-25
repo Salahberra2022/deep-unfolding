@@ -207,7 +207,7 @@ class Richardson(IterativeModel):
     Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor):
+    def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor, omega: float = 0.25):
         """Initialize the Richardson iteration solver.
 
         Args:
@@ -218,6 +218,8 @@ class Richardson(IterativeModel):
           y: Solution tensor.
         """
         super().__init__(n, a, h, bs, y)
+        
+        self.omega = torch.tensor(omega)
 
     def iterate(self, num_itr: int = 25) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
@@ -232,7 +234,6 @@ class Richardson(IterativeModel):
             - List containing the trajectory of solutions throughout the iterations.
         """
         traj = []
-        omega = torch.tensor(0.25)
         s = torch.zeros(self.bs, self.n).to(device)
         traj.append(s)
 
@@ -240,7 +241,7 @@ class Richardson(IterativeModel):
         s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for _ in range(num_itr):
-            s = s + torch.mul(omega, (yMF - torch.matmul(s, self.A)))
+            s = s + torch.mul(self.omega, (yMF - torch.matmul(s, self.A)))
             traj.append(s)
 
         return s, traj

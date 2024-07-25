@@ -134,7 +134,8 @@ def test_GS_iterate(generate_matrices):
 
 def test_RI_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    ri_model = Richardson(n, A, H, bs, y)
+    omega = 0.25
+    ri_model = Richardson(n, A, H, bs, y, omega=omega)
 
     assert ri_model.n == n, "Attribute n should be initialized correctly in RI model"
     assert (
@@ -144,6 +145,9 @@ def test_RI_initialization(generate_matrices):
     assert (
         ri_model.y.shape == y.shape
     ), "Attribute y should be initialized correctly in RI model"
+    assert (
+        ri_model.omega == omega
+    ), "Attribute omega should be initialized correctly in RI model"
 
     A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A)
     assert torch.allclose(
