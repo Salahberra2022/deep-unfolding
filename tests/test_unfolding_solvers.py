@@ -8,7 +8,7 @@ import torch.nn as nn
 
 from deep_unfolding import (
     AORNet,
-    RINet,
+    RichardsonNet,
     SORChebyNet,
     SORNet,
     device,
@@ -129,7 +129,7 @@ def test_AORNet_forward(generate_matrices):
 # Test RINet
 def test_RINet_initialization(generate_matrices):
     A, H, y, n, m, bs, solution = generate_matrices
-    model = RINet(A, H, bs, y, device=device)
+    model = RichardsonNet(A, H, bs, y, device=device)
 
     assert model.A.shape == (n, n), "Attribute A should have the correct shape"
     assert model.H.shape == (n, m), "Attribute H should have the correct shape"
@@ -144,7 +144,7 @@ def test_RINet_initialization(generate_matrices):
 
 def test_RINet_forward(generate_matrices):
     A, H, y, n, m, bs, solution = generate_matrices
-    model = RINet(A, H, bs, y, device=device)
+    model = RichardsonNet(A, H, bs, y, device=device)
 
     s, traj = model.forward(num_itr=3)
 

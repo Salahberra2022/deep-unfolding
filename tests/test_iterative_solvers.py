@@ -8,8 +8,8 @@ import torch
 
 from deep_unfolding import (
     AOR,
-    GS,
-    RI,
+    GaussSeidel,
+    Richardson,
     SOR,
     AORCheby,
     BaseModel,
@@ -86,7 +86,7 @@ def test_base_model_initialization(generate_matrices):
 
 def test_GS_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    gs_model = GS(n, A, H, bs, y)
+    gs_model = GaussSeidel(n, A, H, bs, y)
 
     assert gs_model.n == n, "Attribute n should be initialized correctly in GS model"
     assert (
@@ -120,7 +120,7 @@ def test_GS_initialization(generate_matrices):
 
 def test_GS_iterate(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    gs_model = GS(n, A, H, bs, y)
+    gs_model = GaussSeidel(n, A, H, bs, y)
 
     s, traj = gs_model.iterate(num_itr=5)
 
@@ -134,7 +134,7 @@ def test_GS_iterate(generate_matrices):
 
 def test_RI_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    ri_model = RI(n, A, H, bs, y)
+    ri_model = Richardson(n, A, H, bs, y)
 
     assert ri_model.n == n, "Attribute n should be initialized correctly in RI model"
     assert (
@@ -168,7 +168,7 @@ def test_RI_initialization(generate_matrices):
 
 def test_RI_iteration(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    ri_model = RI(n, A, H, bs, y)
+    ri_model = Richardson(n, A, H, bs, y)
 
     s, traj = ri_model.iterate(num_itr=5)
     assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
