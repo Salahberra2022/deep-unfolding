@@ -19,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if
 print(f"Code run on : {device}")
 
 
-def generate_A_H_sol(
+def gen_linear(
     n: int = 300,
     m: int = 600,
     seed: int = 12,
