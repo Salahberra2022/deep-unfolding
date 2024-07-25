@@ -131,7 +131,7 @@ class SORNet(nn.Module):
           init_val_SORNet: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super(SORNet, self).__init__()
+        super().__init__()
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_SORNet, device=device))
 
@@ -237,7 +237,7 @@ class SORChebyNet(nn.Module):
           init_val_SOR_CHEBY_Net_alpha: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super(SORChebyNet, self).__init__()
+        super().__init__()
         self.device = device
         self.gamma = nn.Parameter(
             init_val_SOR_CHEBY_Net_gamma * torch.ones(num_itr, device=device)
@@ -358,7 +358,7 @@ class AORNet(nn.Module):
           init_val_AORNet_omega: Initial value for `omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super(AORNet, self).__init__()
+        super().__init__()
         self.device = device
         self.r = nn.Parameter(torch.tensor(init_val_AORNet_r, device=device))
         self.omega = nn.Parameter(torch.tensor(init_val_AORNet_omega, device=device))
@@ -455,7 +455,7 @@ class RichardsonNet(nn.Module):
           init_val_RINet: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super(RichardsonNet, self).__init__()
+        super().__init__()
         self.device = device
         self.inv_omega = nn.Parameter(torch.tensor(init_val_RINet, device=device))
 
