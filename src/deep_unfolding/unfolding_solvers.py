@@ -78,8 +78,32 @@ def evaluate_model(
         norm_list.append(err)
     return norm_list
 
+class UnfoldingNet(nn.Module) : 
+  
+  def __init__(
+    self,
+    a: Tensor,
+    h: Tensor,
+    bs: int,
+    y: Tensor,
+    device: torch.device = _device,
+  ) : 
+    
+    super().__init__()
+    self.device = device
 
-class SORNet(nn.Module):
+    a, d, l, u, _, _ = _decompose_matrix(a)
+
+    self.A = a.to(device)
+    self.D = d.to(device)
+    self.L = l.to(device)
+    self.U = u.to(device)
+    self.H = h.to(device)
+    self.Dinv = torch.linalg.inv(d).to(device)
+    self.bs = bs
+    self.y = y.to(device)
+
+class SORNet(UnfoldingNet):
     """Deep unfolded SOR with a constant step size."""
 
     device: torch.device
@@ -131,20 +155,8 @@ class SORNet(nn.Module):
           init_val_SORNet: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super().__init__()
-        self.device = device
+        super().__init__(a, h, bs, y, device)
         self.inv_omega = nn.Parameter(torch.tensor(init_val_SORNet, device=device))
-
-        a, d, l, u, _, _ = _decompose_matrix(a)
-
-        self.A = a.to(device)
-        self.D = d.to(device)
-        self.L = l.to(device)
-        self.U = u.to(device)
-        self.H = h.to(device)
-        self.Dinv = torch.linalg.inv(d).to(device)
-        self.bs = bs
-        self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the SORNet model.
@@ -172,8 +184,7 @@ class SORNet(nn.Module):
 
         return s, traj
 
-
-class SORChebyNet(nn.Module):
+class SORChebyNet(UnfoldingNet):
     """Deep unfolded SOR with Chebyshev acceleration."""
 
     device: torch.device
@@ -237,8 +248,7 @@ class SORChebyNet(nn.Module):
           init_val_SOR_CHEBY_Net_alpha: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super().__init__()
-        self.device = device
+        super().__init__(a, h, bs, y, device)
         self.gamma = nn.Parameter(
             init_val_SOR_CHEBY_Net_gamma * torch.ones(num_itr, device=device)
         )
@@ -248,16 +258,6 @@ class SORChebyNet(nn.Module):
         self.inv_omega = nn.Parameter(
             torch.tensor(init_val_SOR_CHEBY_Net_alpha, device=device)
         )
-
-        a, d, l, u, _, _ = _decompose_matrix(a)
-        self.A = a
-        self.D = d.to(device)
-        self.L = l.to(device)
-        self.U = u.to(device)
-        self.H = h.to(device)
-        self.Dinv = torch.linalg.inv(d).to(device)
-        self.bs = bs
-        self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the SOR_CHEBY_Net model.
@@ -301,7 +301,7 @@ class SORChebyNet(nn.Module):
 # =====================================================================================
 
 
-class AORNet(nn.Module):
+class AORNet(UnfoldingNet):
     """Deep unfolded AOR with a constant step size."""
 
     device: torch.device
@@ -358,20 +358,9 @@ class AORNet(nn.Module):
           init_val_AORNet_omega: Initial value for `omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super().__init__()
-        self.device = device
+        super().__init__(a, h, bs, y, device)
         self.r = nn.Parameter(torch.tensor(init_val_AORNet_r, device=device))
         self.omega = nn.Parameter(torch.tensor(init_val_AORNet_omega, device=device))
-
-        a, d, l, u, _, _ = _decompose_matrix(a)
-        self.A = a.to(device)
-        self.D = d.to(device)
-        self.L = l.to(device)
-        self.U = u.to(device)
-        self.H = h.to(device)
-        self.Dinv = torch.linalg.inv(d).to(device)
-        self.bs = bs
-        self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the AORNet model.
@@ -406,7 +395,7 @@ class AORNet(nn.Module):
         return s, traj
 
 
-class RichardsonNet(nn.Module):
+class RichardsonNet(UnfoldingNet):
     """Deep unfolded Richardson iteration."""
 
     inv_omega: nn.Parameter
@@ -455,19 +444,8 @@ class RichardsonNet(nn.Module):
           init_val_RINet: Initial value for `inv_omega`.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super().__init__()
-        self.device = device
+        super().__init__(a, h, bs, y, device)
         self.inv_omega = nn.Parameter(torch.tensor(init_val_RINet, device=device))
-
-        a, d, l, u, _, _ = _decompose_matrix(a)
-        self.A = a.to(device)
-        self.D = d.to(device)
-        self.L = l.to(device)
-        self.U = u.to(device)
-        self.H = h.to(device)
-        self.Dinv = torch.linalg.inv(d).to(device)
-        self.bs = bs
-        self.y = y.to(device)
 
     def forward(self, num_itr: int = 25) -> tuple[Tensor, list[Tensor]]:
         """Perform forward pass of the RINet model.
