@@ -10,45 +10,6 @@ from torch import Tensor
 
 from .utils import _decompose_matrix, _device
 
-
-def model_iterations(
-    model,
-    solution: Tensor,
-    n: int,
-    total_itr: int = 25,
-    bs: int = 10000,
-    device: torch.device=_device
-) -> tuple[list[Tensor], list[float]]:
-    """Perform iterations using the provided model and calculate the error norm
-      at each iteration.
-
-    Args:
-      total_itr: Total number of iterations to perform.
-      n: Dimension of the solution.
-      bs: Batch size.
-      model: The model instance that provides the iterate method.
-      solution: The ground truth solution tensor.
-
-    Returns:
-      A tuple with the following contents:
-        - List of tensors representing the solution estimates at each iteration.
-        - List of float values representing the normalized error at each iteration.
-    """
-    norm_list_model = []  # Initialize the iteration list
-    s_hats = []
-
-    for i in range(total_itr + 1):
-        s_hat, _ = model.iterate(i)
-        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
-            n * bs
-        )
-
-        s_hats.append(s_hat)
-        norm_list_model.append(err)
-
-    return s_hats, norm_list_model
-
-
 class IterativeModel:
     """Base model class for matrix decomposition and initialization."""
 
@@ -91,6 +52,7 @@ class IterativeModel:
           h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
+          device: Device to run the model on ('cpu' or 'cuda').
         """
         self.n = n
         self.H = h
@@ -98,7 +60,37 @@ class IterativeModel:
         self.y = y
 
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = _decompose_matrix(a, device)
+    
+    def solve(self,
+              solution: Tensor,
+              total_itr: int = 25,
+              device: torch.device=_device
+          ) -> tuple[list[Tensor], list[float]] :
+        """Perform iterations using the provided model and calculate the error norm at each iteration.
 
+      Args:
+        solution: The ground truth solution tensor.
+        total_itr: Total number of iterations to perform.
+        device: Device to run the model on ('cpu' or 'cuda').
+        
+      Returns:
+        A tuple with the following contents:
+          - List of tensors representing the solution estimates at each iteration.
+          - List of float values representing the normalized error at each iteration.
+      """
+        norm_list_model = []  # Initialize the iteration list
+        s_hats = []
+
+        for i in range(total_itr + 1):
+            s_hat, _ = self._iterate(i, device=device)
+            err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+                self.n * self.bs
+            )
+
+            s_hats.append(s_hat)
+            norm_list_model.append(err)
+
+        return s_hats, norm_list_model
 
 class GaussSeidel(IterativeModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
@@ -145,10 +137,11 @@ class GaussSeidel(IterativeModel):
           h: Random matrix H.
           bs: Batch size.
           y: Solution tensor.
+          device: Device to run the model on ('cpu' or 'cuda').
         """
         super().__init__(n, a, h, bs, y, device)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
           and trajectory of solutions.
 
@@ -222,7 +215,7 @@ class Richardson(IterativeModel):
         
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
           trajectory of solutions.
 
@@ -307,7 +300,7 @@ class Jacobi(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the Jacobi iterations and returns the final solution and
           trajectory of solutions.
 
@@ -394,7 +387,7 @@ class SOR(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the SOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -499,7 +492,7 @@ class SORCheby(IterativeModel):
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the SOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -610,7 +603,7 @@ class AOR(IterativeModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the AOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -713,7 +706,7 @@ class AORCheby(IterativeModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
         """Performs the AOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
