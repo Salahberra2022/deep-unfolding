@@ -82,7 +82,15 @@ class IterativeModel:
         s_hats = []
 
         for i in range(total_itr + 1):
-            s_hat, _ = self._iterate(i, device=device)
+          
+            traj = []
+            s = torch.zeros(self.bs, self.n).to(device)
+            traj.append(s)
+
+            yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+            s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
+            
+            s_hat, _ = self._iterate(i, traj, yMF, s)
             err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
                 self.n * self.bs
             )
@@ -141,7 +149,7 @@ class GaussSeidel(IterativeModel):
         """
         super().__init__(n, a, h, bs, y, device)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
           and trajectory of solutions.
 
@@ -153,13 +161,7 @@ class GaussSeidel(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
-        s = torch.zeros(self.bs, self.n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
-
+        
         for _ in range(num_itr):
             temp = -torch.matmul(s, self.U) + yMF
             s = torch.matmul(temp, self.Minv)
@@ -215,7 +217,7 @@ class Richardson(IterativeModel):
         
         self.omega = torch.tensor(omega)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
           trajectory of solutions.
 
@@ -227,12 +229,6 @@ class Richardson(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
-        s = torch.zeros(self.bs, self.n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for _ in range(num_itr):
             s = s + torch.mul(self.omega, (yMF - torch.matmul(s, self.A)))
@@ -300,7 +296,7 @@ class Jacobi(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the Jacobi iterations and returns the final solution and
           trajectory of solutions.
 
@@ -312,12 +308,6 @@ class Jacobi(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
-        s = torch.zeros(self.bs, self.n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
 
         for _ in range(num_itr):
             temp = torch.matmul(self.Dinv, (self.D - self.A))
@@ -387,7 +377,7 @@ class SOR(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the SOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -399,17 +389,9 @@ class SOR(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
-        n = self.y.size(1)
 
         inv_omega = torch.div(1, self.omega)
         m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
-
-        s = torch.zeros(self.bs, n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)
-        s = torch.matmul(yMF, self.Dinv)
 
         for _ in range(num_itr):
             temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
@@ -492,7 +474,7 @@ class SORCheby(IterativeModel):
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the SOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -504,20 +486,12 @@ class SORCheby(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
 
         inv_omega = torch.div(1, self.omega)
         m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
 
-        s = torch.zeros(self.bs, self.n).to(device)
-        s_new = torch.zeros(self.bs, self.n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)
-        s = torch.matmul(yMF, self.Dinv)
-
         s_present = s
-        s_old = torch.zeros(s_present.shape).to(device)
+        s_old = torch.zeros(s_present.shape)
 
         for _ in range(num_itr):
             temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
@@ -603,7 +577,7 @@ class AOR(IterativeModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the AOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -615,21 +589,16 @@ class AOR(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
 
         m = self.D - torch.mul(self.r, self.L)
         m_inv_aor = torch.linalg.inv(m)
+        
+        # ! bug : difference between n and self.n (some ambiguity)
         n = (
             torch.mul((1 - self.omega), self.D)
             + torch.mul((self.omega - self.r), self.L)
             + torch.mul(self.omega, self.U)
         )
-
-        s = torch.zeros(self.bs, self.n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)
-        s = torch.matmul(yMF, self.Dinv)
 
         for _ in range(num_itr):
             s = torch.matmul(s, torch.matmul(m_inv_aor, n)) + torch.mul(
@@ -706,7 +675,7 @@ class AORCheby(IterativeModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def _iterate(self, num_itr: int = 25, device: torch.device=_device) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
         """Performs the AOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -718,13 +687,6 @@ class AORCheby(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        traj = []
-
-        s = torch.zeros(self.bs, self.n).to(device)
-        traj.append(s)
-
-        yMF = torch.matmul(self.y, self.H.T)
-        s = torch.matmul(yMF, self.Dinv)
 
         y0 = s
 
