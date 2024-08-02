@@ -12,12 +12,11 @@ from deep_unfolding import (
     Richardson,
     SOR,
     AORCheby,
-    BaseModel,
+    IterativeModel,
     Jacobi,
     SORCheby,
     _decompose_matrix,
     _device,
-    model_iterations,
 )
 
 
@@ -39,16 +38,16 @@ def generate_solution():
     return torch.from_numpy(np.random.rand(bs, n)).float().to(_device)
 
 
-def test_model_iterations(generate_matrices, generate_solution):
+def test_solve(generate_matrices, generate_solution):
     n, _, _, bs, _ = generate_matrices
     solution = generate_solution
 
-    class DummyModel:
+    class DummyModel(IterativeModel):
         def iterate(self, i):
             return solution, []
 
     model = DummyModel()
-    s_hats, norm_list_model = model_iterations(model, solution, n, total_itr=5, bs=bs)
+    s_hats, norm_list_model = model.solve(solution, n, total_itr=5, bs=bs)
 
     assert len(s_hats) == 6, "s_hats should contain total_itr + 1 elements"
     assert (
@@ -62,7 +61,7 @@ def test_model_iterations(generate_matrices, generate_solution):
 
 def test_base_model_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    model = BaseModel(n, A, H, bs, y, _device)
+    model = IterativeModel(n, A, H, bs, y, _device)
 
     assert model.n == n, "Attribute n should be initialized correctly"
     assert model.H.shape == H.shape, "Attribute H should be initialized correctly"

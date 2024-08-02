@@ -13,14 +13,14 @@ from deep_unfolding import (
     SORNet,
     _device,
     evaluate_model,
-    generate_A_H_sol,
+    gen_linear,
     train_model,
 )
 
 # Fixture pour générer les matrices et tensors nécessaires
 @pytest.fixture
 def generate_matrices():
-    A, H, _, solution, y = generate_A_H_sol()
+    A, H, _, solution, y = gen_linear()
     n, m = A.shape[0], H.shape[1]
     bs = solution.shape[0]
     return A, H, y, n, m, bs, solution
