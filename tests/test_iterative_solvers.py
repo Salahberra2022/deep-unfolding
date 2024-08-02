@@ -6,6 +6,9 @@ import numpy as np
 import pytest
 import torch
 
+from torch import Tensor
+from numpy.typing import NDArray
+
 from deep_unfolding import (
     AOR,
     GaussSeidel,
@@ -37,17 +40,18 @@ def generate_solution():
     n = 300
     return torch.from_numpy(np.random.rand(bs, n)).float().to(_device)
 
+class DummyModel(IterativeModel):
+
+    def _iterate(self, num_itr: int, traj: list, yMF: torch.Tensor, s: torch.Tensor) -> tuple[torch.Tensor, list]:
+        return generate_solution(), []
+
 
 def test_solve(generate_matrices, generate_solution):
-    n, _, _, bs, _ = generate_matrices
+    n, a, h, bs, y = generate_matrices
     solution = generate_solution
 
-    class DummyModel(IterativeModel):
-        def iterate(self, i):
-            return solution, []
-
-    model = DummyModel()
-    s_hats, norm_list_model = model.solve(solution, n, total_itr=5, bs=bs)
+    model = DummyModel(n, a, h, bs, y)
+    s_hats, norm_list_model = model.solve(solution, total_itr=5)
 
     assert len(s_hats) == 6, "s_hats should contain total_itr + 1 elements"
     assert (
@@ -61,7 +65,7 @@ def test_solve(generate_matrices, generate_solution):
 
 def test_base_model_initialization(generate_matrices):
     n, A, H, bs, y = generate_matrices
-    model = IterativeModel(n, A, H, bs, y, _device)
+    model = DummyModel(n, A, H, bs, y, _device)
 
     assert model.n == n, "Attribute n should be initialized correctly"
     assert model.H.shape == H.shape, "Attribute H should be initialized correctly"
@@ -119,17 +123,21 @@ def test_GS_initialization(generate_matrices):
 
 
 def test_GS_iterate(generate_matrices):
+    num_itr = 5
     n, A, H, bs, y = generate_matrices
     gs_model = GaussSeidel(n, A, H, bs, y, _device)
 
-    s, traj = gs_model._iterate(num_itr=5, device=_device)
+    traj = [ torch.zeros(gs_model.bs, gs_model.n).to(_device) ]
+    yMF = torch.matmul(gs_model.y, gs_model.H.T)
+    s = torch.matmul(yMF, gs_model.Dinv)
+    s_hat, _ = gs_model._iterate(num_itr, traj, yMF, s)
 
-    assert len(traj) == 6, "Trajectory should contain num_itr + 1 elements"
+    assert len(traj) == num_itr + 1, "Trajectory should contain num_itr + 1 elements"
     assert traj[0].shape == (
         bs,
         n,
     ), "Each element in the trajectory should have shape (bs, n)"
-    assert s.shape == (bs, n), "Final solution tensor should have shape (bs, n)"
+    assert s_hat.shape == (bs, n), "Final solution tensor should have shape (bs, n)"
 
 
 def test_RI_initialization(generate_matrices):
