@@ -4,13 +4,15 @@
 
 """Conventional iterative methods."""
 
+from abc import ABC, abstractmethod
+
 import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
 from .utils import _decompose_matrix, _device
 
-class IterativeModel:
+class IterativeModel(ABC):
     """Base model class for matrix decomposition and initialization."""
 
     n: int
@@ -60,7 +62,12 @@ class IterativeModel:
         self.y = y
 
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = _decompose_matrix(a, device)
-    
+
+    @abstractmethod
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
+        """Iteration method, to be implemented in subclasses."""
+        pass
+
     def solve(self,
               total_itr: int = 25,
               device: torch.device=_device
@@ -70,7 +77,7 @@ class IterativeModel:
       Args:
         total_itr: Total number of iterations to perform.
         device: Device to run the model on ('cpu' or 'cuda').
-        
+
       Returns:
         A tuple with the following contents:
           - List of tensors representing the solution estimates at each iteration.
@@ -78,14 +85,14 @@ class IterativeModel:
         s_hats = []
 
         for i in range(total_itr + 1):
-          
+
             traj = []
             s = torch.zeros(self.bs, self.n).to(device)
             traj.append(s)
 
             yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
             s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
-            
+
             s_hat, _ = self._iterate(i, traj, yMF, s)
             s_hats.append(s_hat)
 
@@ -140,7 +147,7 @@ class GaussSeidel(IterativeModel):
         """
         super().__init__(n, a, h, bs, y, device)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
           and trajectory of solutions.
 
@@ -152,7 +159,7 @@ class GaussSeidel(IterativeModel):
             - The final solution tensor of shape (`bs`, `n`).
             - List containing the trajectory of solutions throughout the iterations.
         """
-        
+
         for _ in range(num_itr):
             temp = -torch.matmul(s, self.U) + yMF
             s = torch.matmul(temp, self.Minv)
@@ -205,10 +212,10 @@ class Richardson(IterativeModel):
           y: Solution tensor.
         """
         super().__init__(n, a, h, bs, y, device)
-        
+
         self.omega = torch.tensor(omega)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
           trajectory of solutions.
 
@@ -287,7 +294,7 @@ class Jacobi(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the Jacobi iterations and returns the final solution and
           trajectory of solutions.
 
@@ -368,7 +375,7 @@ class SOR(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the SOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -465,7 +472,7 @@ class SORCheby(IterativeModel):
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the SOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
@@ -568,7 +575,7 @@ class AOR(IterativeModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the AOR iterations and returns the final solution and
           trajectory of solutions.
 
@@ -583,7 +590,7 @@ class AOR(IterativeModel):
 
         m = self.D - torch.mul(self.r, self.L)
         m_inv_aor = torch.linalg.inv(m)
-        
+
         # ! bug : difference between n and self.n (some ambiguity)
         n = (
             torch.mul((1 - self.omega), self.D)
@@ -666,7 +673,7 @@ class AORCheby(IterativeModel):
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
-    def _iterate(self, num_itr: int = 25, traj:list=None, yMF:torch.tensor=None, s:torch.tensor=None) -> tuple[Tensor, list]:
+    def _iterate(self, num_itr: int, traj: list, yMF: Tensor, s: Tensor) -> tuple[Tensor, list]:
         """Performs the AOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
 
