@@ -45,6 +45,9 @@ class IterativeModel(ABC):
     Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
+    device: torch.device
+    """Device where to run the model."""
+
     def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor, device: torch.device=_device):
         """Initialize the base_model with the given parameters and decompose matrix $A$.
 
@@ -60,6 +63,7 @@ class IterativeModel(ABC):
         self.H = h
         self.bs = bs
         self.y = y
+        self.device = device
 
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = _decompose_matrix(a, device)
 
@@ -70,7 +74,6 @@ class IterativeModel(ABC):
 
     def solve(self,
               total_itr: int = 25,
-              device: torch.device=_device
           ) -> tuple[list[Tensor], list[float]] :
         """Perform iterations using the provided model and calculate the error norm at each iteration.
 
@@ -87,7 +90,7 @@ class IterativeModel(ABC):
         for i in range(total_itr + 1):
 
             traj = []
-            s = torch.zeros(self.bs, self.n).to(device)
+            s = torch.zeros(self.bs, self.n).to(self.device)
             traj.append(s)
 
             yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
@@ -100,39 +103,6 @@ class IterativeModel(ABC):
 
 class GaussSeidel(IterativeModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
-
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
-
-    num_itr: int
-    """The number of Gauss-Seidel iterations to perform."""
 
     def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor, device: torch.device=_device):
         """Initialize the Gauss-Seidel solver.
@@ -171,35 +141,8 @@ class GaussSeidel(IterativeModel):
 class Richardson(IterativeModel):
     """Class implementing the Richardson iteration algorithm for solving a linear system."""
 
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
+    omega: Tensor
+    """TODO explain what omega is."""
 
     def __init__(self, n: int, a: NDArray, h: Tensor, bs: int, y: Tensor, omega: float = 0.25, device: torch.device=_device):
         """Initialize the Richardson iteration solver.
@@ -210,6 +153,8 @@ class Richardson(IterativeModel):
           h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
+          omega: TODO explain.
+          device: Device where to run the model.
         """
         super().__init__(n, a, h, bs, y, device)
 
@@ -238,36 +183,6 @@ class Richardson(IterativeModel):
 class Jacobi(IterativeModel):
     """Class implementing the Jacobi iteration algorithm for solving a linear system."""
 
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
-
     omega: Tensor
     """Relaxation parameter for Jacobi iterations."""
 
@@ -290,6 +205,7 @@ class Jacobi(IterativeModel):
           bs: Batch size.
           y: Solution tensor.
           omega: Relaxation parameter for Jacobi iterations.
+          device: Device where to run the model.
         """
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
@@ -319,36 +235,6 @@ class SOR(IterativeModel):
     """Class implementing the Successive Over-Relaxation (SOR) algorithm for
     solving a linear system."""
 
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
-
     omega: Tensor
     """Relaxation parameter for SOR iterations."""
 
@@ -371,6 +257,7 @@ class SOR(IterativeModel):
           bs: Batch size.
           y: Solution tensor.
           omega: Relaxation parameter for SOR iterations.
+          device: Device where to run the model.
         """
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
@@ -404,36 +291,6 @@ class SOR(IterativeModel):
 class SORCheby(IterativeModel):
     """Class implementing the SOR-Chebyshev algorithm for solving a linear system."""
 
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
-
     omega: Tensor
     """Relaxation parameter for SOR iterations."""
 
@@ -466,6 +323,7 @@ class SORCheby(IterativeModel):
           omega: Relaxation parameter for SOR iterations.
           omegaa: Acceleration parameter for SOR-Chebyshev iterations.
           gamma: Damping factor for SOR-Chebyshev iterations.
+          device: Device where to run the model.
         """
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
@@ -513,36 +371,6 @@ class AOR(IterativeModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
     solving a linear system."""
 
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
-
     omega: Tensor
     """Relaxation parameter for AOR iterations."""
 
@@ -570,6 +398,7 @@ class AOR(IterativeModel):
           y: Solution tensor.
           omega: Relaxation parameter for AOR iterations.
           r: Relaxation parameter.
+          device: Device where to run the model.
         """
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
@@ -611,36 +440,6 @@ class AORCheby(IterativeModel):
     """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
     acceleration algorithm for solving a linear system."""
 
-    n: int
-    """Dimension of the solution."""
-
-    H: Tensor
-    """Random matrix $H$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution tensor."""
-
-    A: Tensor
-    """Original matrix converted to a torch tensor."""
-
-    D: Tensor
-    """Diagonal matrix of $A$."""
-
-    L: Tensor
-    """Lower triangular matrix of $A$."""
-
-    U: Tensor
-    """Upper triangular matrix of $A$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    Minv: Tensor
-    """Inverse of the matrix $D + L$."""
-
     omega: Tensor
     """Relaxation parameter for AOR iterations."""
 
@@ -668,6 +467,7 @@ class AORCheby(IterativeModel):
           y: Solution tensor.
           omega: Relaxation parameter for AOR iterations.
           r: Relaxation parameter.
+          device: Device where to run the model.
         """
         super().__init__(n, a, h, bs, y, device)
         self.omega = torch.tensor(omega)
