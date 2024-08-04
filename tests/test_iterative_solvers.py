@@ -8,11 +8,11 @@ import torch
 
 from deep_unfolding import (
     AOR,
-    GaussSeidel,
-    Richardson,
     SOR,
     AORCheby,
+    GaussSeidel,
     Jacobi,
+    Richardson,
     SORCheby,
     _decompose_matrix,
     _device,
@@ -43,6 +43,7 @@ _aorcheb_rs = [0.1]
 # ################# Common data fixtures for all models ##################### #
 # By parameterizing fixtures we create combinations of all parameters to test #
 # ########################################################################### #
+
 
 @pytest.fixture(scope="module", params=_seeds)
 def seed_to_test(request):
@@ -138,9 +139,11 @@ def aorcheb_omega_to_test(request):
 def aorcheb_r_to_test(request):
     return request.param
 
+
 # ################################# #
 # #### Model creation fixtures #### #
 # ################################# #
+
 
 @pytest.fixture(scope="module")
 def gs_model(common_data_to_test):
@@ -171,10 +174,25 @@ def sor_model(common_data_to_test, sor_omega_to_test):
 
 
 @pytest.fixture(scope="module")
-def sorcheb_model(common_data_to_test, sorcheb_omega_to_test, sorcheb_omegaa_to_test, sorcheb_gamma_to_test):
+def sorcheb_model(
+    common_data_to_test,
+    sorcheb_omega_to_test,
+    sorcheb_omegaa_to_test,
+    sorcheb_gamma_to_test,
+):
     """Create and return a SOR-Chebyshev model."""
     n, A, H, bs, y, device = common_data_to_test
-    return SORCheby(n, A, H, bs, y, sorcheb_omega_to_test, sorcheb_omegaa_to_test, sorcheb_gamma_to_test, device)
+    return SORCheby(
+        n,
+        A,
+        H,
+        bs,
+        y,
+        sorcheb_omega_to_test,
+        sorcheb_omegaa_to_test,
+        sorcheb_gamma_to_test,
+        device,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -210,9 +228,15 @@ def common_initialization_tests(itmodel, common_data_to_test):
     assert torch.allclose(
         itmodel.A, A_torch
     ), "Attribute A should match the decomposed matrix"
-    assert torch.allclose(itmodel.D, D), "Attribute D should match the decomposed matrix"
-    assert torch.allclose(itmodel.L, L), "Attribute L should match the decomposed matrix"
-    assert torch.allclose(itmodel.U, U), "Attribute U should match the decomposed matrix"
+    assert torch.allclose(
+        itmodel.D, D
+    ), "Attribute D should match the decomposed matrix"
+    assert torch.allclose(
+        itmodel.L, L
+    ), "Attribute L should match the decomposed matrix"
+    assert torch.allclose(
+        itmodel.U, U
+    ), "Attribute U should match the decomposed matrix"
     assert torch.allclose(
         itmodel.Dinv, Dinv
     ), "Attribute Dinv should match the decomposed matrix"
@@ -231,36 +255,72 @@ def test_gs_initialization(gs_model, common_data_to_test):
     common_initialization_tests(gs_model, common_data_to_test)
 
 
-def test_ri_initialization(ri_model, common_data_to_test):
+def test_ri_initialization(ri_model, common_data_to_test, ri_omega_to_test):
     """Test initialization of the Richardson model."""
     common_initialization_tests(ri_model, common_data_to_test)
+    assert (
+        ri_model.omega == ri_omega_to_test
+    ), "Richardson omega should be initialized correctly"
 
 
-def test_jac_initialization(jac_model, common_data_to_test):
+def test_jac_initialization(jac_model, common_data_to_test, jac_omega_to_test):
     """Test initialization of the Jacobi model."""
     common_initialization_tests(jac_model, common_data_to_test)
+    assert (
+        jac_model.omega == jac_omega_to_test
+    ), "Jacobi omega should be initialized correctly"
 
 
-def test_sor_initialization(sor_model, common_data_to_test):
+def test_sor_initialization(sor_model, common_data_to_test, sor_omega_to_test):
     """Test initialization of the SOR model."""
     common_initialization_tests(sor_model, common_data_to_test)
+    assert (
+        sor_model.omega == sor_omega_to_test
+    ), "SOR omega should be initialized correctly"
 
 
-def test_sorcheb_initialization(sorcheb_model, common_data_to_test):
+def test_sorcheb_initialization(
+    sorcheb_model,
+    common_data_to_test,
+    sorcheb_omega_to_test,
+    sorcheb_omegaa_to_test,
+    sorcheb_gamma_to_test,
+):
     """Test initialization of the SOR-Chebyshev model."""
     common_initialization_tests(sorcheb_model, common_data_to_test)
+    assert (
+        sorcheb_model.omega == sorcheb_omega_to_test
+    ), "SOR-Cheby omega should be initialized correctly"
+    assert (
+        sorcheb_model.omegaa == sorcheb_omegaa_to_test
+    ), "SOR-Cheby omegaa should be initialized correctly"
+    assert (
+        sorcheb_model.gamma == sorcheb_gamma_to_test
+    ), "SOR-Cheby gamma should be initialized correctly"
 
 
-def test_aor_initialization(aor_model, common_data_to_test):
+def test_aor_initialization(
+    aor_model, common_data_to_test, aor_omega_to_test, aor_r_to_test
+):
     """Test initialization of the AOR model."""
     common_initialization_tests(aor_model, common_data_to_test)
+    assert (
+        aor_model.omega == aor_omega_to_test
+    ), "AOR omega should be initialized correctly"
+    assert aor_model.r == aor_r_to_test, "AOR r should be initialized correctly"
 
 
-def test_aorcheb_initialization(aorcheb_model, common_data_to_test):
+def test_aorcheb_initialization(
+    aorcheb_model, common_data_to_test, aorcheb_omega_to_test, aorcheb_r_to_test
+):
     """Test initialization of the AOR-Chebyshev model."""
     common_initialization_tests(aorcheb_model, common_data_to_test)
-
-
+    assert (
+        aorcheb_model.omega == aorcheb_omega_to_test
+    ), "AOR-Cheby omega should be initialized correctly"
+    assert (
+        aorcheb_model.r == aorcheb_r_to_test
+    ), "AOR-Cheby r should be initialized correctly"
 
 
 if __name__ == "__main__":
