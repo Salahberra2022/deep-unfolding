@@ -10,7 +10,7 @@ from torch import Tensor
 
 from .utils import _decompose_matrix, _device
 
-
+"""
 def train_model(
     model: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
@@ -19,19 +19,6 @@ def train_model(
     total_itr: int = 25,
     num_batch: int = 10000,
 ) -> tuple[torch.nn.Module, list[float]]:
-    """Train the given model using the specified optimizer and loss function.
-
-    Args:
-      model: The model to be trained.
-      optimizer: The optimizer to use for training.
-      loss_func: The loss function to use for training.
-      total_itr: The total number of iterations (generations) for training.
-      solution: The target solution tensor.
-      num_batch: The number of batches per iteration.
-
-    Returns:
-      The trained model and the list of loss values per iteration.
-    """
     loss_gen = []
     for gen in range(total_itr):
         for i in range(num_batch):
@@ -45,7 +32,7 @@ def train_model(
                 print("generation:", gen + 1, " batch:", i, "\t MSE loss:", loss.item())
         loss_gen.append(loss.item())
     return model, loss_gen
-
+"""
 
 def evaluate_model(
     model: torch.nn.Module,
@@ -102,6 +89,40 @@ class UnfoldingNet(nn.Module) :
     self.Dinv = torch.linalg.inv(d).to(device)
     self.bs = bs
     self.y = y.to(device)
+  
+  def train(
+    self,
+    optimizer: torch.optim.Optimizer,
+    loss_func: torch.nn.Module,
+    solution: Tensor,
+    total_itr: int = 25,
+    num_batch: int = 10000,
+) -> tuple[torch.nn.Module, list[float]]:
+    """Train the given model using the specified optimizer and loss function.
+
+    Args:
+      optimizer: The optimizer to use for training.
+      loss_func: The loss function to use for training.
+      total_itr: The total number of iterations (generations) for training.
+      solution: The target solution tensor.
+      num_batch: The number of batches per iteration.
+
+    Returns:
+      The trained model and the list of loss values per iteration.
+    """
+    loss_gen = []
+    for gen in range(total_itr):
+        for i in range(num_batch):
+            optimizer.zero_grad()
+            x_hat, _ = self(gen + 1)
+            loss = loss_func(x_hat, solution)
+            loss.backward()
+            optimizer.step()
+
+            if i % 200 == 0:
+                print("generation:", gen + 1, " batch:", i, "\t MSE loss:", loss.item())
+        loss_gen.append(loss.item())
+    return loss_gen
 
 class SORNet(UnfoldingNet):
     """Deep unfolded SOR with a constant step size."""
@@ -183,6 +204,7 @@ class SORNet(UnfoldingNet):
             traj.append(s)
 
         return s, traj
+
 
 class SORChebyNet(UnfoldingNet):
     """Deep unfolded SOR with Chebyshev acceleration."""

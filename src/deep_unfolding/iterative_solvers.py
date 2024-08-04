@@ -62,23 +62,19 @@ class IterativeModel:
         self.A, self.D, self.L, self.U, self.Dinv, self.Minv = _decompose_matrix(a, device)
     
     def solve(self,
-              solution: Tensor,
               total_itr: int = 25,
               device: torch.device=_device
           ) -> tuple[list[Tensor], list[float]] :
         """Perform iterations using the provided model and calculate the error norm at each iteration.
 
       Args:
-        solution: The ground truth solution tensor.
         total_itr: Total number of iterations to perform.
         device: Device to run the model on ('cpu' or 'cuda').
         
       Returns:
         A tuple with the following contents:
           - List of tensors representing the solution estimates at each iteration.
-          - List of float values representing the normalized error at each iteration.
       """
-        norm_list_model = []  # Initialize the iteration list
         s_hats = []
 
         for i in range(total_itr + 1):
@@ -91,14 +87,9 @@ class IterativeModel:
             s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
             
             s_hat, _ = self._iterate(i, traj, yMF, s)
-            err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
-                self.n * self.bs
-            )
-
             s_hats.append(s_hat)
-            norm_list_model.append(err)
 
-        return s_hats, norm_list_model
+        return s_hats
 
 class GaussSeidel(IterativeModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
