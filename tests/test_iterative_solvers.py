@@ -6,106 +6,260 @@ import numpy as np
 import pytest
 import torch
 
-from torch import Tensor
-from numpy.typing import NDArray
-
 from deep_unfolding import (
     AOR,
     GaussSeidel,
     Richardson,
     SOR,
     AORCheby,
-    IterativeModel,
     Jacobi,
     SORCheby,
     _decompose_matrix,
     _device,
 )
 
+# ############################################################ #
+# ############### Parameters to use in tests ################# #
+# Create more combinations by adding values to the lists below #
+# ############################################################ #
 
-@pytest.fixture
-def generate_matrices():
-    n = 300
-    m = 600
-    bs = 10
-    A = np.random.rand(n, n)
-    H = torch.from_numpy(np.random.rand(n, m)).float().to(_device)
-    y = torch.from_numpy(np.random.rand(bs, m)).float().to(_device)
-    return n, A, H, bs, y
+_seeds = [123]
+_ns = [300]
+_ms = [600]
+_bss = [10]
+_devices = ["cpu"]
+_ri_omegas = [0.25]
+_jac_omegas = [0.2]
+_sor_omegas = [1.8]
+_sorcheb_omegas = [1.8]
+_sorcheb_omegaas = [0.8]
+_sorcheb_gammas = [0.8]
+_aor_omegas = [0.3]
+_aor_rs = [0.2]
+_aorcheb_omegas = [0.1]
+_aorcheb_rs = [0.1]
 
+# ########################################################################### #
+# ################# Common data fixtures for all models ##################### #
+# By parameterizing fixtures we create combinations of all parameters to test #
+# ########################################################################### #
 
-@pytest.fixture
-def generate_solution():
-    bs = 10
-    n = 300
-    return torch.from_numpy(np.random.rand(bs, n)).float().to(_device)
-
-
-def pytest_generate_tests(metafunc):
-    """Special PyTest function for dynamically creating parameterized fixtures."""
-
-    if "iterative_model" in metafunc.fixturenames:
-        models_to_test = []
-        n, A, H, bs, y = generate_matrices
-
-        # Gauss-Seidel
-        models_to_test.append(GaussSeidel(n, A, H, bs, y, _device))
-
-        # Richardson model
-        omega = 0.25
-        models_to_test.append(Richardson(n, A, H, bs, y, omega, _device))
-
-        # Jacobi model
-        omega = 0.2
-        models_to_test.append(Jacobi(n, A, H, bs, y, omega, _device))
-
-        # SOR model
-        omega = 1.8
-        models_to_test.append(SOR(n, A, H, bs, y, omega, _device))
-
-        # SOR-Cheby model
-        omega = 1.8
-        omegaa = 0.8
-        gamma = 0.8
-        models_to_test.append(SORCheby(n, A, H, bs, y, omega, omegaa, gamma, _device))
-
-        # AOR model
-        omega = 0.3
-        r = 0.2
-        models_to_test.append(AOR(n, A, H, bs, y, omega, r, _device))
-
-        # AOR-Cheby model
-        omega = 0.1
-        r = 0.1
-        models_to_test.append(AORCheby(n, A, H, bs, y, omega, r, _device))
-
-        # Generate a dynamic 'iterative_model' fixture with all the iterative
-        # models to test
-        metafunc.parametrize("iterative_model", models_to_test)
+@pytest.fixture(scope="module", params=_seeds)
+def seed_to_test(request):
+    """Seeds to test."""
+    return request.param
 
 
+@pytest.fixture(scope="module", params=_ns)
+def n_to_test(request):
+    """Values of n to test."""
+    return request.param
 
-def test_model_initialization(iterative_model):
-    """Test initialization of models defined in the iterative_models fixture."""
 
-    assert iterative_model.n == n, "Attribute n should be initialized correctly"
-    assert iterative_model.H.shape == H.shape, "Attribute H should be initialized correctly"
-    assert iterative_model.bs == bs, "Attribute bs should be initialized correctly"
-    assert iterative_model.y.shape == y.shape, "Attribute y should be initialized correctly"
+@pytest.fixture(scope="module", params=_ms)
+def m_to_test(request):
+    """Values of m to test."""
+    return request.param
 
-    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A, _device)
+
+@pytest.fixture(scope="module", params=_bss)
+def bs_to_test(request):
+    """Values of bs to test."""
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_devices)
+def device_to_test(request):
+    """Devices to test."""
+    return request.param
+
+
+@pytest.fixture(scope="module")
+def common_data_to_test(seed_to_test, n_to_test, m_to_test, bs_to_test, device_to_test):
+    """Collate common data for all models."""
+    rng = np.random.default_rng(seed_to_test)
+    A = rng.random((n_to_test, n_to_test))
+    H = torch.from_numpy(rng.random((n_to_test, m_to_test))).float().to(_device)
+    y = torch.from_numpy(rng.random((bs_to_test, m_to_test))).float().to(_device)
+    return n_to_test, A, H, bs_to_test, y, device_to_test
+
+
+# ######################################### #
+# ### Data fixtures for specific models ### #
+# ######################################### #
+
+
+@pytest.fixture(scope="module", params=_ri_omegas)
+def ri_omega_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_jac_omegas)
+def jac_omega_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_sor_omegas)
+def sor_omega_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_sorcheb_omegas)
+def sorcheb_omega_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_sorcheb_omegaas)
+def sorcheb_omegaa_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_sorcheb_gammas)
+def sorcheb_gamma_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_aor_omegas)
+def aor_omega_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_aor_rs)
+def aor_r_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_aorcheb_omegas)
+def aorcheb_omega_to_test(request):
+    return request.param
+
+
+@pytest.fixture(scope="module", params=_aorcheb_rs)
+def aorcheb_r_to_test(request):
+    return request.param
+
+# ################################# #
+# #### Model creation fixtures #### #
+# ################################# #
+
+@pytest.fixture(scope="module")
+def gs_model(common_data_to_test):
+    """Create and return a Gauss-Seidel model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return GaussSeidel(n, A, H, bs, y, device)
+
+
+@pytest.fixture(scope="module")
+def ri_model(common_data_to_test, ri_omega_to_test):
+    """Create and return a Richardson model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return Richardson(n, A, H, bs, y, ri_omega_to_test, device)
+
+
+@pytest.fixture(scope="module")
+def jac_model(common_data_to_test, jac_omega_to_test):
+    """Create and return a Jacobi model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return Jacobi(n, A, H, bs, y, jac_omega_to_test, device)
+
+
+@pytest.fixture(scope="module")
+def sor_model(common_data_to_test, sor_omega_to_test):
+    """Create and return a SOR model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return SOR(n, A, H, bs, y, sor_omega_to_test, device)
+
+
+@pytest.fixture(scope="module")
+def sorcheb_model(common_data_to_test, sorcheb_omega_to_test, sorcheb_omegaa_to_test, sorcheb_gamma_to_test):
+    """Create and return a SOR-Chebyshev model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return SORCheby(n, A, H, bs, y, sorcheb_omega_to_test, sorcheb_omegaa_to_test, sorcheb_gamma_to_test, device)
+
+
+@pytest.fixture(scope="module")
+def aor_model(common_data_to_test, aor_omega_to_test, aor_r_to_test):
+    """Create and return an AOR model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return AOR(n, A, H, bs, y, aor_omega_to_test, aor_r_to_test, device)
+
+
+@pytest.fixture(scope="module")
+def aorcheb_model(common_data_to_test, aorcheb_omega_to_test, aorcheb_r_to_test):
+    """Create and return an AOR model."""
+    n, A, H, bs, y, device = common_data_to_test
+    return AORCheby(n, A, H, bs, y, aorcheb_omega_to_test, aorcheb_r_to_test, device)
+
+
+# ######################## #
+# ### Helper functions ### #
+# ######################## #
+
+
+def common_initialization_tests(itmodel, common_data_to_test):
+    """Perform common initialization checks."""
+    n, A, H, bs, y, device = common_data_to_test
+
+    assert itmodel.n == n, "Attribute n should be initialized correctly"
+    assert itmodel.H.shape == H.shape, "Attribute H should be initialized correctly"
+    assert itmodel.bs == bs, "Attribute bs should be initialized correctly"
+    assert itmodel.y.shape == y.shape, "Attribute y should be initialized correctly"
+    assert itmodel.device == device, "Device should be initialized correctly"
+
+    A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A, device)
     assert torch.allclose(
-        iterative_model.A, A_torch
+        itmodel.A, A_torch
     ), "Attribute A should match the decomposed matrix"
-    assert torch.allclose(iterative_model.D, D), "Attribute D should match the decomposed matrix"
-    assert torch.allclose(iterative_model.L, L), "Attribute L should match the decomposed matrix"
-    assert torch.allclose(iterative_model.U, U), "Attribute U should match the decomposed matrix"
+    assert torch.allclose(itmodel.D, D), "Attribute D should match the decomposed matrix"
+    assert torch.allclose(itmodel.L, L), "Attribute L should match the decomposed matrix"
+    assert torch.allclose(itmodel.U, U), "Attribute U should match the decomposed matrix"
     assert torch.allclose(
-        iterative_model.Dinv, Dinv
+        itmodel.Dinv, Dinv
     ), "Attribute Dinv should match the decomposed matrix"
     assert torch.allclose(
-        iterative_model.Minv, Minv
+        itmodel.Minv, Minv
     ), "Attribute Minv should match the decomposed matrix"
+
+
+# ############################ #
+# ### Initialization tests ### #
+# ############################ #
+
+
+def test_gs_initialization(gs_model, common_data_to_test):
+    """Test initialization of the Gauss-Seidel model."""
+    common_initialization_tests(gs_model, common_data_to_test)
+
+
+def test_ri_initialization(ri_model, common_data_to_test):
+    """Test initialization of the Richardson model."""
+    common_initialization_tests(ri_model, common_data_to_test)
+
+
+def test_jac_initialization(jac_model, common_data_to_test):
+    """Test initialization of the Jacobi model."""
+    common_initialization_tests(jac_model, common_data_to_test)
+
+
+def test_sor_initialization(sor_model, common_data_to_test):
+    """Test initialization of the SOR model."""
+    common_initialization_tests(sor_model, common_data_to_test)
+
+
+def test_sorcheb_initialization(sorcheb_model, common_data_to_test):
+    """Test initialization of the SOR-Chebyshev model."""
+    common_initialization_tests(sorcheb_model, common_data_to_test)
+
+
+def test_aor_initialization(aor_model, common_data_to_test):
+    """Test initialization of the AOR model."""
+    common_initialization_tests(aor_model, common_data_to_test)
+
+
+def test_aorcheb_initialization(aorcheb_model, common_data_to_test):
+    """Test initialization of the AOR-Chebyshev model."""
+    common_initialization_tests(aorcheb_model, common_data_to_test)
+
 
 
 
