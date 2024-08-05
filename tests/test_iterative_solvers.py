@@ -209,13 +209,13 @@ def aorcheb_model(common_data_to_test, aorcheb_omega_to_test, aorcheb_r_to_test)
     return AORCheby(n, A, H, bs, y, aorcheb_omega_to_test, aorcheb_r_to_test, device)
 
 
-# ######################## #
-# ### Helper functions ### #
-# ######################## #
+# ############################ #
+# ### Initialization tests ### #
+# ############################ #
 
 
 def common_initialization_tests(itmodel, common_data_to_test):
-    """Perform common initialization checks."""
+    """Helper function to perform common initialization checks."""
     n, A, H, bs, y, device = common_data_to_test
 
     assert itmodel.n == n, "Attribute n should be initialized correctly"
@@ -243,11 +243,6 @@ def common_initialization_tests(itmodel, common_data_to_test):
     assert torch.allclose(
         itmodel.Minv, Minv
     ), "Attribute Minv should match the decomposed matrix"
-
-
-# ############################ #
-# ### Initialization tests ### #
-# ############################ #
 
 
 def test_gs_initialization(gs_model, common_data_to_test):
@@ -322,6 +317,76 @@ def test_aorcheb_initialization(
         aorcheb_model.r == aorcheb_r_to_test
     ), "AOR-Cheby r should be initialized correctly"
 
+
+# ######################## #
+# ### _iterate() tests ### #
+# ######################## #
+
+# Values to test for num_itr
+_num_itr_to_test = [ 5, 10 ]
+
+def common_iterate_tests(itmodel, common_data_to_test, num_itr):
+
+    n, A, H, bs, y, _ = common_data_to_test
+
+    traj = [ torch.zeros(itmodel.bs, itmodel.n).to(itmodel.device) ]
+    yMF = torch.matmul(itmodel.y, itmodel.H.T).to(itmodel.device)
+    s = torch.matmul(yMF, itmodel.Dinv)
+    s_hat, _ = itmodel._iterate(num_itr, traj, yMF, s)
+
+    assert len(traj) == num_itr + 1, "Trajectory should contain num_itr + 1 elements"
+    assert traj[0].shape == (
+        bs,
+        n,
+    ), "Each element in the trajectory should have shape (bs, n)"
+    assert s_hat.shape == (bs, n), "Final solution tensor should have shape (bs, n)"
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_gs_iterate(gs_model, common_data_to_test, num_itr):
+    """Test iteration of the Gauss-Seidel model."""
+    common_iterate_tests(gs_model, common_data_to_test, num_itr)
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_ri_iterate(ri_model, common_data_to_test, num_itr):
+    """Test iteration of the Richardson model."""
+    common_iterate_tests(ri_model, common_data_to_test, num_itr)
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_jac_iterate(jac_model, common_data_to_test, num_itr):
+    """Test iteration of the Jacobi model."""
+    common_iterate_tests(jac_model, common_data_to_test, num_itr)
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_sor_iterate(sor_model, common_data_to_test, num_itr):
+    """Test iteration of the SOR model."""
+    common_iterate_tests(sor_model, common_data_to_test, num_itr)
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_sorcheb_iterate(sorcheb_model, common_data_to_test, num_itr):
+    """Test iteration of the SOR-Chebyshev model."""
+    common_iterate_tests(sorcheb_model, common_data_to_test, num_itr)
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_aor_iterate(aor_model, common_data_to_test, num_itr):
+    """Test iteration of the AOR model."""
+    common_iterate_tests(aor_model, common_data_to_test, num_itr)
+
+
+@pytest.mark.parametrize("num_itr", _num_itr_to_test)
+def test_aorcheb_iterate(aorcheb_model, common_data_to_test, num_itr):
+    """Test iteration of the AOR-Chebyshev model."""
+    common_iterate_tests(aorcheb_model, common_data_to_test, num_itr)
+
+
+# ####################################### #
+# ### Run this test module separately ### #
+# ####################################### #
 
 if __name__ == "__main__":
     pytest.main()
