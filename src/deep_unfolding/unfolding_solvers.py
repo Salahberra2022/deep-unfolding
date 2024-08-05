@@ -65,8 +65,8 @@ def evaluate_model(
         norm_list.append(err)
     return norm_list
 
-class UnfoldingNet(nn.Module) : 
-  
+class UnfoldingNet(nn.Module) :
+
   def __init__(
     self,
     a: Tensor,
@@ -74,8 +74,8 @@ class UnfoldingNet(nn.Module) :
     bs: int,
     y: Tensor,
     device: torch.device = _device,
-  ) : 
-    
+  ) :
+
     super().__init__()
     self.device = device
 
@@ -89,15 +89,15 @@ class UnfoldingNet(nn.Module) :
     self.Dinv = torch.linalg.inv(d).to(device)
     self.bs = bs
     self.y = y.to(device)
-  
-  def train(
+
+  def deep_train(
     self,
     optimizer: torch.optim.Optimizer,
     loss_func: torch.nn.Module,
     solution: Tensor,
     total_itr: int = 25,
     num_batch: int = 10000,
-) -> tuple[torch.nn.Module, list[float]]:
+) -> list[float]:
     """Train the given model using the specified optimizer and loss function.
 
     Args:
@@ -108,7 +108,7 @@ class UnfoldingNet(nn.Module) :
       num_batch: The number of batches per iteration.
 
     Returns:
-      The trained model and the list of loss values per iteration.
+      The list of loss values per iteration.
     """
     loss_gen = []
     for gen in range(total_itr):
