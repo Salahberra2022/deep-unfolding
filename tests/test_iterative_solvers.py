@@ -89,6 +89,7 @@ def common_data_to_test(rng_for_tests, n_to_test, m_to_test, bs_to_test, device_
     return n_to_test, A, H, bs_to_test, y, device_to_test
 
 
+# TODO This fixture is not currently being used, check if it's necessary to keep it
 @pytest.fixture()
 def solution_to_test(common_data_to_test, rng_for_tests):
     """Solution to test."""
@@ -404,61 +405,54 @@ def test_aorcheb_iterate(aorcheb_model, common_data_to_test, num_itr):
 _total_itr = [ 5, 10 ]
 
 
-def common_solve_tests(itmodel, solution, total_itr):
+def common_solve_tests(itmodel, total_itr):
     """Common code for testing solve() for each model."""
 
-    s_hats, norm_list_model = itmodel.solve(solution, total_itr)
+    s_hats = itmodel.solve(total_itr)
 
     assert len(s_hats) == total_itr + 1, "s_hats should contain total_itr + 1 elements"
-    assert (
-        len(norm_list_model) == total_itr + 1
-    ), "norm_list_model should contain total_itr + 1 elements"
-    for norm in norm_list_model:
-        assert isinstance(
-            norm, float
-        ), "Each element in norm_list_model should be a float"
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_gs_solve(gs_model, solution_to_test, total_itr):
+def test_gs_solve(gs_model, total_itr):
     """Test solve() for the Gauss-Seidel model."""
-    common_solve_tests(gs_model, solution_to_test, total_itr)
+    common_solve_tests(gs_model, total_itr)
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_ri_solve(ri_model, solution_to_test, total_itr):
+def test_ri_solve(ri_model, total_itr):
     """Test solve() for the Richardson model."""
-    common_solve_tests(ri_model, solution_to_test, total_itr)
+    common_solve_tests(ri_model, total_itr)
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_jac_solve(jac_model, solution_to_test, total_itr):
+def test_jac_solve(jac_model, total_itr):
     """Test solve() for the Jacobi model."""
-    common_solve_tests(jac_model, solution_to_test, total_itr)
+    common_solve_tests(jac_model, total_itr)
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_sor_solve(sor_model, solution_to_test, total_itr):
+def test_sor_solve(sor_model, total_itr):
     """Test solve() for the SOR model."""
-    common_solve_tests(sor_model, solution_to_test, total_itr)
+    common_solve_tests(sor_model, total_itr)
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_sorcheb_solve(sorcheb_model, solution_to_test, total_itr):
+def test_sorcheb_solve(sorcheb_model, total_itr):
     """Test solve() for the SOR-Chebyshev model."""
-    common_solve_tests(sorcheb_model, solution_to_test, total_itr)
+    common_solve_tests(sorcheb_model, total_itr)
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_aor_solve(aor_model, solution_to_test, total_itr):
+def test_aor_solve(aor_model, total_itr):
     """Test solve() for the AOR model."""
-    common_solve_tests(aor_model, solution_to_test, total_itr)
+    common_solve_tests(aor_model, total_itr)
 
 
 @pytest.mark.parametrize("total_itr", _total_itr)
-def test_aorcheb_solve(aorcheb_model, solution_to_test, total_itr):
+def test_aorcheb_solve(aorcheb_model, total_itr):
     """Test solve() for the AOR-Chebyshev model."""
-    common_solve_tests(aorcheb_model, solution_to_test, total_itr)
+    common_solve_tests(aorcheb_model, total_itr)
 
 
 # ####################################### #
