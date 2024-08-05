@@ -15,7 +15,6 @@ from deep_unfolding import (
     Richardson,
     SORCheby,
     _decompose_matrix,
-    _device,
 )
 
 # ############################################################ #
@@ -45,44 +44,56 @@ _aorcheb_rs = [0.1]
 # ########################################################################### #
 
 
-@pytest.fixture(scope="module", params=_seeds)
-def seed_to_test(request):
+@pytest.fixture(params=_seeds)
+def seed_for_tests(request):
     """Seeds to test."""
     return request.param
 
 
-@pytest.fixture(scope="module", params=_ns)
+@pytest.fixture(params=_ns)
 def n_to_test(request):
     """Values of n to test."""
     return request.param
 
 
-@pytest.fixture(scope="module", params=_ms)
+@pytest.fixture(params=_ms)
 def m_to_test(request):
     """Values of m to test."""
     return request.param
 
 
-@pytest.fixture(scope="module", params=_bss)
+@pytest.fixture(params=_bss)
 def bs_to_test(request):
     """Values of bs to test."""
     return request.param
 
 
-@pytest.fixture(scope="module", params=_devices)
+@pytest.fixture(params=_devices)
 def device_to_test(request):
     """Devices to test."""
     return request.param
 
 
-@pytest.fixture(scope="module")
-def common_data_to_test(seed_to_test, n_to_test, m_to_test, bs_to_test, device_to_test):
+@pytest.fixture()
+def rng_for_tests(seed_for_tests):
+    """Provides a PRNG for reproducible tests."""
+    return np.random.default_rng(seed_for_tests)
+
+
+@pytest.fixture()
+def common_data_to_test(rng_for_tests, n_to_test, m_to_test, bs_to_test, device_to_test):
     """Collate common data for all models."""
-    rng = np.random.default_rng(seed_to_test)
-    A = rng.random((n_to_test, n_to_test))
-    H = torch.from_numpy(rng.random((n_to_test, m_to_test))).float().to(_device)
-    y = torch.from_numpy(rng.random((bs_to_test, m_to_test))).float().to(_device)
+    A = rng_for_tests.random((n_to_test, n_to_test))
+    H = torch.from_numpy(rng_for_tests.random((n_to_test, m_to_test))).float().to(device_to_test)
+    y = torch.from_numpy(rng_for_tests.random((bs_to_test, m_to_test))).float().to(device_to_test)
     return n_to_test, A, H, bs_to_test, y, device_to_test
+
+
+@pytest.fixture()
+def solution_to_test(common_data_to_test, rng_for_tests):
+    """Solution to test."""
+    n, _, _, bs, _, device = common_data_to_test
+    return torch.from_numpy(rng_for_tests.random((bs, n))).float().to(device)
 
 
 # ######################################### #
@@ -90,52 +101,52 @@ def common_data_to_test(seed_to_test, n_to_test, m_to_test, bs_to_test, device_t
 # ######################################### #
 
 
-@pytest.fixture(scope="module", params=_ri_omegas)
+@pytest.fixture(params=_ri_omegas)
 def ri_omega_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_jac_omegas)
+@pytest.fixture(params=_jac_omegas)
 def jac_omega_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_sor_omegas)
+@pytest.fixture(params=_sor_omegas)
 def sor_omega_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_sorcheb_omegas)
+@pytest.fixture(params=_sorcheb_omegas)
 def sorcheb_omega_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_sorcheb_omegaas)
+@pytest.fixture(params=_sorcheb_omegaas)
 def sorcheb_omegaa_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_sorcheb_gammas)
+@pytest.fixture(params=_sorcheb_gammas)
 def sorcheb_gamma_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_aor_omegas)
+@pytest.fixture(params=_aor_omegas)
 def aor_omega_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_aor_rs)
+@pytest.fixture(params=_aor_rs)
 def aor_r_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_aorcheb_omegas)
+@pytest.fixture(params=_aorcheb_omegas)
 def aorcheb_omega_to_test(request):
     return request.param
 
 
-@pytest.fixture(scope="module", params=_aorcheb_rs)
+@pytest.fixture(params=_aorcheb_rs)
 def aorcheb_r_to_test(request):
     return request.param
 
@@ -145,35 +156,35 @@ def aorcheb_r_to_test(request):
 # ################################# #
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def gs_model(common_data_to_test):
     """Create and return a Gauss-Seidel model."""
     n, A, H, bs, y, device = common_data_to_test
     return GaussSeidel(n, A, H, bs, y, device)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def ri_model(common_data_to_test, ri_omega_to_test):
     """Create and return a Richardson model."""
     n, A, H, bs, y, device = common_data_to_test
     return Richardson(n, A, H, bs, y, ri_omega_to_test, device)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def jac_model(common_data_to_test, jac_omega_to_test):
     """Create and return a Jacobi model."""
     n, A, H, bs, y, device = common_data_to_test
     return Jacobi(n, A, H, bs, y, jac_omega_to_test, device)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def sor_model(common_data_to_test, sor_omega_to_test):
     """Create and return a SOR model."""
     n, A, H, bs, y, device = common_data_to_test
     return SOR(n, A, H, bs, y, sor_omega_to_test, device)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def sorcheb_model(
     common_data_to_test,
     sorcheb_omega_to_test,
@@ -195,14 +206,14 @@ def sorcheb_model(
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def aor_model(common_data_to_test, aor_omega_to_test, aor_r_to_test):
     """Create and return an AOR model."""
     n, A, H, bs, y, device = common_data_to_test
     return AOR(n, A, H, bs, y, aor_omega_to_test, aor_r_to_test, device)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def aorcheb_model(common_data_to_test, aorcheb_omega_to_test, aorcheb_r_to_test):
     """Create and return an AOR model."""
     n, A, H, bs, y, device = common_data_to_test
@@ -326,8 +337,8 @@ def test_aorcheb_initialization(
 _num_itr_to_test = [ 5, 10 ]
 
 def common_iterate_tests(itmodel, common_data_to_test, num_itr):
-
-    n, A, H, bs, y, _ = common_data_to_test
+    """Common code for testing _iterate() for each model."""
+    n, _, _, bs, _, _ = common_data_to_test
 
     traj = [ torch.zeros(itmodel.bs, itmodel.n).to(itmodel.device) ]
     yMF = torch.matmul(itmodel.y, itmodel.H.T).to(itmodel.device)
@@ -382,6 +393,72 @@ def test_aor_iterate(aor_model, common_data_to_test, num_itr):
 def test_aorcheb_iterate(aorcheb_model, common_data_to_test, num_itr):
     """Test iteration of the AOR-Chebyshev model."""
     common_iterate_tests(aorcheb_model, common_data_to_test, num_itr)
+
+
+# ##################### #
+# ### solve() tests ### #
+# ##################### #
+
+
+# Values to test for total_itr
+_total_itr = [ 5, 10 ]
+
+
+def common_solve_tests(itmodel, solution, total_itr):
+    """Common code for testing solve() for each model."""
+
+    s_hats, norm_list_model = itmodel.solve(solution, total_itr)
+
+    assert len(s_hats) == total_itr + 1, "s_hats should contain total_itr + 1 elements"
+    assert (
+        len(norm_list_model) == total_itr + 1
+    ), "norm_list_model should contain total_itr + 1 elements"
+    for norm in norm_list_model:
+        assert isinstance(
+            norm, float
+        ), "Each element in norm_list_model should be a float"
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_gs_solve(gs_model, solution_to_test, total_itr):
+    """Test solve() for the Gauss-Seidel model."""
+    common_solve_tests(gs_model, solution_to_test, total_itr)
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_ri_solve(ri_model, solution_to_test, total_itr):
+    """Test solve() for the Richardson model."""
+    common_solve_tests(ri_model, solution_to_test, total_itr)
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_jac_solve(jac_model, solution_to_test, total_itr):
+    """Test solve() for the Jacobi model."""
+    common_solve_tests(jac_model, solution_to_test, total_itr)
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_sor_solve(sor_model, solution_to_test, total_itr):
+    """Test solve() for the SOR model."""
+    common_solve_tests(sor_model, solution_to_test, total_itr)
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_sorcheb_solve(sorcheb_model, solution_to_test, total_itr):
+    """Test solve() for the SOR-Chebyshev model."""
+    common_solve_tests(sorcheb_model, solution_to_test, total_itr)
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_aor_solve(aor_model, solution_to_test, total_itr):
+    """Test solve() for the AOR model."""
+    common_solve_tests(aor_model, solution_to_test, total_itr)
+
+
+@pytest.mark.parametrize("total_itr", _total_itr)
+def test_aorcheb_solve(aorcheb_model, solution_to_test, total_itr):
+    """Test solve() for the AOR-Chebyshev model."""
+    common_solve_tests(aorcheb_model, solution_to_test, total_itr)
 
 
 # ####################################### #
