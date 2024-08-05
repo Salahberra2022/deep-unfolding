@@ -74,7 +74,7 @@ class IterativeModel(ABC):
 
     def solve(self,
               total_itr: int = 25,
-          ) -> tuple[list[Tensor], list[float]] :
+          ) -> list[Tensor]:
         """Perform iterations using the provided model and calculate the error norm at each iteration.
 
       Args:
