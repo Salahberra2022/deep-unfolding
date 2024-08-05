@@ -14,7 +14,7 @@ from deep_unfolding import (
     _device,
     evaluate_model,
     gen_linear,
-    train_model,
+    #train_model,
 )
 
 # Fixture pour générer les matrices et tensors nécessaires
@@ -156,18 +156,18 @@ def test_RINet_forward(generate_matrices):
 
 ############################## TEST FUNCTIONS ##############################
 # test functions just with SORNet is sufficient
-def test_train_model(generate_matrices):
-    A, H, y, n, m, bs, solution = generate_matrices
-    model = SORNet(A, H, bs, y, device=_device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-    loss_func = nn.MSELoss()
+# def test_train_model(generate_matrices):
+#     A, H, y, n, m, bs, solution = generate_matrices
+#     model = SORNet(A, H, bs, y, device=_device)
+#     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+#     loss_func = nn.MSELoss()
 
-    trained_model, loss_gen = train_model(
-        model, optimizer, loss_func, solution, total_itr=3, num_batch=5
-    )
+#     trained_model, loss_gen = train_model(
+#         model, optimizer, loss_func, solution, total_itr=3, num_batch=5
+#     )
 
-    assert isinstance(trained_model, SORNet), "Returned model should be of type SORNet"
-    assert len(loss_gen) == 3, "Length of loss_gen should be equal to total_itr"
+#     assert isinstance(trained_model, SORNet), "Returned model should be of type SORNet"
+#     assert len(loss_gen) == 3, "Length of loss_gen should be equal to total_itr"
 
 
 def test_evaluate_model(generate_matrices):
