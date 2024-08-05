@@ -346,6 +346,7 @@ class SORCheby(IterativeModel):
         inv_omega = torch.div(1, self.omega)
         m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
 
+        s_new = traj[-1] # Required when num_itr == 0
         s_present = s
         s_old = torch.zeros(s_present.shape)
 
