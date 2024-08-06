@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import torch
 
-from deep_unfolding import decompose_matrix, generate_A_H_sol
+from deep_unfolding import _decompose_matrix, gen_linear
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def generate_data():
     )  # Vous pouvez aussi tester sur GPU si disponible
 
     # Appeler la fonction
-    return generate_A_H_sol(n, m, seed, bs, device)
+    return gen_linear(n, m, seed, bs, device)
 
 
 def test_A_shape(generate_data):
@@ -71,7 +71,7 @@ def test_y_calculation(generate_data):
 @pytest.fixture
 def decompose_data():
     A = np.random.rand(5, 5)
-    return decompose_matrix(A)
+    return _decompose_matrix(A)
 
 
 def test_decompose_matrix_shapes(decompose_data):

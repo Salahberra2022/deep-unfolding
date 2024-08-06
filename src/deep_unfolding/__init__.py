@@ -12,40 +12,38 @@ __all__ = [
     "AOR",
     "AORCheby",
     "AORNet",
-    "BaseModel",
-    "decompose_matrix",
-    "device",
+    "IterativeModel",
+    "_decompose_matrix",
+    "_device",
     "evaluate_model",
-    "generate_A_H_sol",
-    "GS",
+    "gen_linear",
+    "GaussSeidel",
     "Jacobi",
-    "model_iterations",
-    "RI",
-    "RINet",
+    "Richardson",
+    "RichardsonNet",
     "SOR",
     "SORCheby",
     "SORChebyNet",
     "SORNet",
-    "train_model",
+    #"train_model",
 ]
 
-from deep_unfolding.methods import (
+from deep_unfolding.iterative_solvers import (
     AOR,
-    GS,
-    RI,
+    GaussSeidel,
+    Richardson,
     SOR,
     AORCheby,
-    BaseModel,
+    IterativeModel,
     Jacobi,
     SORCheby,
-    model_iterations,
 )
-from deep_unfolding.train_methods import (
+from deep_unfolding.unfolding_solvers import (
     AORNet,
-    RINet,
+    RichardsonNet,
     SORChebyNet,
     SORNet,
     evaluate_model,
-    train_model,
+    #train_model,
 )
-from deep_unfolding.utils import decompose_matrix, device, generate_A_H_sol
+from deep_unfolding.utils import _decompose_matrix, _device, gen_linear

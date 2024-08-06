@@ -13,18 +13,18 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if not CPU
+_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if not CPU
 """The device where training will take place."""
 
-print(f"Code run on : {device}")
+print(f"Code run on : {_device}")
 
 
-def generate_A_H_sol(
+def gen_linear(
     n: int = 300,
     m: int = 600,
     seed: int = 12,
     bs: int = 10,
-    device: torch.device = device,
+    device: torch.device = _device,
 ) -> tuple[NDArray, Tensor, Tensor, Tensor, Tensor]:
     """Generate matrices $A$, $H$, and $W$, as well as the solution and $y$.
 
@@ -64,14 +64,16 @@ def generate_A_H_sol(
     return a, ht, wt, solution, y
 
 
-def decompose_matrix(
+def _decompose_matrix(
     a: NDArray | Tensor,
+    device: torch.device = _device,
 ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
     """Decompose a given matrix into its diagonal, lower triangular, upper
     triangular components and their inverses.
 
     Args:
       a: Input square matrix to decompose.
+      device: Device to run the computations on.
 
     Returns:
       A tuple with the following contents:
@@ -98,3 +100,36 @@ def decompose_matrix(
     mt_inv = Tensor(m_inv).to(device)
 
     return at, dt, lt, ut, dt_inv, mt_inv
+
+
+
+""" to be adapted to evaluate the models with a known solution
+  
+  
+  def solve(self,
+              solution: Tensor,
+              total_itr: int = 25,
+              device: torch.device=_device
+          ) -> tuple[list[Tensor], list[float]] :
+        norm_list_model = []  # Initialize the iteration list
+        s_hats = []
+
+        for i in range(total_itr + 1):
+          
+            traj = []
+            s = torch.zeros(self.bs, self.n).to(device)
+            traj.append(s)
+
+            yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
+            s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
+            
+            s_hat, _ = self._iterate(i, traj, yMF, s)
+            err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+                self.n * self.bs
+            )
+
+            s_hats.append(s_hat)
+            norm_list_model.append(err)
+
+        return s_hats, norm_list_model
+"""
