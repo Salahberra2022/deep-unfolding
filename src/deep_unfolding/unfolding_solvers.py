@@ -4,6 +4,7 @@
 
 """Deep unfolding versions of the conventional iterative methods."""
 
+import logging
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -29,10 +30,15 @@ def train_model(
             optimizer.step()
 
             if i % 200 == 0:
-                print("generation:", gen + 1, " batch:", i, "\t MSE loss:", loss.item())
+                logger.info(
+                    f"generation: {gen + 1}; batch: {i}; MSE loss: {loss.item()}"
+                )
         loss_gen.append(loss.item())
     return model, loss_gen
 """
+
+# Create a logger for this module
+logger = logging.getLogger(__name__)
 
 def evaluate_model(
     model: torch.nn.Module,
