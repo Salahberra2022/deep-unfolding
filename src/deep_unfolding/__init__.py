@@ -43,7 +43,6 @@ from deep_unfolding.unfolding_solvers import (
     RichardsonNet,
     SORChebyNet,
     SORNet,
-    evaluate_model,
     #train_model,
 )
-from deep_unfolding.utils import _decompose_matrix, _device, gen_linear
+from deep_unfolding.utils import _decompose_matrix, _device, evaluate, gen_linear
