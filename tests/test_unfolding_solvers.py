@@ -12,7 +12,7 @@ from deep_unfolding import (
     SORChebyNet,
     SORNet,
     _device,
-    evaluate_model,
+    evaluate,
     gen_linear,
     #train_model,
 )

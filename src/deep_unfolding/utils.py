@@ -89,7 +89,7 @@ def _decompose_matrix(
     """
     # Decomposed matrix calculations
     d = np.diag(np.diag(a))  # Diagonal matrix
-    l = np.tril(a, -1)  # Lower triangular matrix
+    l = np.tril(a, -1)  # Lower triangular matrix  # noqa: E741
     u = np.triu(a, 1)  # Upper triangular matrix
     d_inv = np.linalg.inv(d)  # Inverse of the diagonal matrix
     m_inv = np.linalg.inv(d + l)  # Inverse of the matrix (D + L)
@@ -105,34 +105,33 @@ def _decompose_matrix(
     return at, dt, lt, ut, dt_inv, mt_inv
 
 
+def evaluate(model, 
+            type:str="unfolding", 
+            num_itr:int=10,
+            solution: Tensor = None, 
+            device: torch.device = _device,
+            ) : 
+  """Evaluate function
 
-""" to be adapted to evaluate the models with a known solution
+  Args:
+      model (None): Model to be evaluated
+      type (str, optional): Type of the model, can be : "unfolding" or "iterative". Defaults to "unfolding".
+      num_itr (int, optional): Number of iterations choose. Defaults to 10.
+      solution (Tensor, optional): The solution of the linear problem. Defaults to None.
+      device (torch.device, optional): The device. Defaults to _device.
+
+  Returns:
+      torch.Tensor : The error between the exact solution and the proposed solution
+  """
+  if type == "iterative" :
+    yMF = torch.matmul(model.y, model.H.T)
+    s = torch.matmul(yMF, model.Dinv)
+    traj = []
+    s_hat, _ = model._iterate(num_itr, traj, yMF, s)
+  else : 
+    s_hat, _ = model(num_itr)
   
-  
-  def solve(self,
-              solution: Tensor,
-              total_itr: int = 25,
-              device: torch.device=_device
-          ) -> tuple[list[Tensor], list[float]] :
-        norm_list_model = []  # Initialize the iteration list
-        s_hats = []
-
-        for i in range(total_itr + 1):
-          
-            traj = []
-            s = torch.zeros(self.bs, self.n).to(device)
-            traj.append(s)
-
-            yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
-            s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
-            
-            s_hat, _ = self._iterate(i, traj, yMF, s)
-            err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
-                self.n * self.bs
+  err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+                model.n * model.bs
             )
-
-            s_hats.append(s_hat)
-            norm_list_model.append(err)
-
-        return s_hats, norm_list_model
-"""
+  return err

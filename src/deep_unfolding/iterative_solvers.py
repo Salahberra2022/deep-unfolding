@@ -52,7 +52,7 @@ class IterativeModel(ABC):
         """Initialize the base_model with the given parameters and decompose matrix $A$.
 
         Args:
-          n: Dimension of the solution.
+          
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.

@@ -11,70 +11,14 @@ from torch import Tensor
 
 from .utils import _decompose_matrix, _device
 
-"""
-def train_model(
-    model: torch.nn.Module,
-    optimizer: torch.optim.Optimizer,
-    loss_func: torch.nn.Module,
-    solution: Tensor,
-    total_itr: int = 25,
-    num_batch: int = 10000,
-) -> tuple[torch.nn.Module, list[float]]:
-    loss_gen = []
-    for gen in range(total_itr):
-        for i in range(num_batch):
-            optimizer.zero_grad()
-            x_hat, _ = model(gen + 1)
-            loss = loss_func(x_hat, solution)
-            loss.backward()
-            optimizer.step()
-
-            if i % 200 == 0:
-                logger.info(
-                    f"generation: {gen + 1}; batch: {i}; MSE loss: {loss.item()}"
-                )
-        loss_gen.append(loss.item())
-    return model, loss_gen
-"""
-
 # Create a logger for this module
 logger = logging.getLogger(__name__)
-
-def evaluate_model(
-    model: torch.nn.Module,
-    solution: Tensor,
-    n: int,
-    bs: int = 10000,
-    total_itr: int = 25,
-    device: torch.device = _device,
-) -> list[float]:
-    """Evaluate the model by calculating the mean squared error (MSE) between
-      the solution and the model's predictions.
-
-    Args:
-      model: The model to be evaluated.
-      solution: The target solution tensor.
-      n: The dimension of the solution.
-      bs: The batch size.
-      total_itr: The total number of iterations for evaluation.
-      device: The device to run the evaluation on.
-
-    Returns:
-      A list of MSE values for each iteration.
-    """
-    norm_list = []
-    for i in range(total_itr + 1):
-        s_hat, _ = model(i)
-        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
-            n * bs
-        )
-        norm_list.append(err)
-    return norm_list
 
 class UnfoldingNet(nn.Module) :
 
   def __init__(
     self,
+    n: int,
     a: Tensor,
     h: Tensor,
     bs: int,
@@ -85,13 +29,14 @@ class UnfoldingNet(nn.Module) :
     super().__init__()
     self.device = device
 
-    a, d, l, u, _, _ = _decompose_matrix(a)
+    a, d, l, u, _, _ = _decompose_matrix(a, device)  # noqa: E741
 
     self.A = a.to(device)
     self.D = d.to(device)
     self.L = l.to(device)
     self.U = u.to(device)
     self.H = h.to(device)
+    self.n = n.to(device) # dimension of the solution (can be find from the problem !to be changed)
     self.Dinv = torch.linalg.inv(d).to(device)
     self.bs = bs
     self.y = y.to(device)
@@ -100,7 +45,8 @@ class UnfoldingNet(nn.Module) :
     self,
     optimizer: torch.optim.Optimizer,
     loss_func: torch.nn.Module,
-    solution: Tensor,
+    A: Tensor,
+    b: Tensor,
     total_itr: int = 25,
     num_batch: int = 10000,
 ) -> list[float]:
@@ -110,7 +56,8 @@ class UnfoldingNet(nn.Module) :
       optimizer: The optimizer to use for training.
       loss_func: The loss function to use for training.
       total_itr: The total number of iterations (generations) for training.
-      solution: The target solution tensor.
+      A: The initial matrix.
+      b: The solution of the linear problem
       num_batch: The number of batches per iteration.
 
     Returns:
@@ -121,7 +68,7 @@ class UnfoldingNet(nn.Module) :
         for i in range(num_batch):
             optimizer.zero_grad()
             x_hat, _ = self(gen + 1)
-            loss = loss_func(x_hat, solution)
+            loss = loss_func(A*x_hat, b) # to avoid using the solution
             loss.backward()
             optimizer.step()
 
