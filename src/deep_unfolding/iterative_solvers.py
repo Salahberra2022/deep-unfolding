@@ -80,7 +80,7 @@ class IterativeModel(ABC):
 
     @abstractmethod
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Iteration method, to be implemented in subclasses."""
         pass
@@ -141,7 +141,7 @@ class GaussSeidel(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the Gauss-Seidel iterations and returns the final solution
           and trajectory of solutions.
@@ -195,7 +195,7 @@ class Richardson(IterativeModel):
         self.omega = torch.tensor(omega)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the Richardson iterations and returns the final solution and
           trajectory of solutions.
@@ -247,7 +247,7 @@ class Jacobi(IterativeModel):
         self.omega = torch.tensor(omega)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the Jacobi iterations and returns the final solution and
           trajectory of solutions.
@@ -301,7 +301,7 @@ class SOR(IterativeModel):
         self.omega = torch.tensor(omega)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the SOR iterations and returns the final solution and
           trajectory of solutions.
@@ -371,7 +371,7 @@ class SORCheby(IterativeModel):
         self.gamma = torch.tensor(gamma)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the SOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
@@ -448,7 +448,7 @@ class AOR(IterativeModel):
         self.r = torch.tensor(r)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the AOR iterations and returns the final solution and
           trajectory of solutions.
@@ -519,7 +519,7 @@ class AORCheby(IterativeModel):
         self.r = torch.tensor(r)
 
     def _iterate(
-        self, num_itr: int, traj: list, yMF: Tensor, s: Tensor
+        self, num_itr: int, traj: list[Tensor], yMF: Tensor, s: Tensor
     ) -> tuple[Tensor, list]:
         """Performs the AOR-Chebyshev iterations and returns the final solution
           and trajectory of solutions.
