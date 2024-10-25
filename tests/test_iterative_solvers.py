@@ -6,16 +6,8 @@ import numpy as np
 import pytest
 import torch
 
-from deep_unfolding import (
-    AOR,
-    SOR,
-    AORCheby,
-    GaussSeidel,
-    Jacobi,
-    Richardson,
-    SORCheby,
-    _decompose_matrix,
-)
+from deep_unfolding import (AOR, SOR, AORCheby, GaussSeidel, Jacobi,
+                            Richardson, SORCheby, _decompose_matrix)
 
 # ############################################################ #
 # ############### Parameters to use in tests ################# #
@@ -81,11 +73,21 @@ def rng_for_tests(seed_for_tests):
 
 
 @pytest.fixture()
-def common_data_to_test(rng_for_tests, n_to_test, m_to_test, bs_to_test, device_to_test):
+def common_data_to_test(
+    rng_for_tests, n_to_test, m_to_test, bs_to_test, device_to_test
+):
     """Collate common data for all models."""
     A = rng_for_tests.random((n_to_test, n_to_test))
-    H = torch.from_numpy(rng_for_tests.random((n_to_test, m_to_test))).float().to(device_to_test)
-    y = torch.from_numpy(rng_for_tests.random((bs_to_test, m_to_test))).float().to(device_to_test)
+    H = (
+        torch.from_numpy(rng_for_tests.random((n_to_test, m_to_test)))
+        .float()
+        .to(device_to_test)
+    )
+    y = (
+        torch.from_numpy(rng_for_tests.random((bs_to_test, m_to_test)))
+        .float()
+        .to(device_to_test)
+    )
     return n_to_test, A, H, bs_to_test, y, device_to_test
 
 
@@ -335,13 +337,14 @@ def test_aorcheb_initialization(
 # ######################## #
 
 # Values to test for num_itr
-_num_itr_to_test = [ 5, 10 ]
+_num_itr_to_test = [5, 10]
+
 
 def common_iterate_tests(itmodel, common_data_to_test, num_itr):
     """Common code for testing _iterate() for each model."""
     n, _, _, bs, _, _ = common_data_to_test
 
-    traj = [ torch.zeros(itmodel.bs, itmodel.n).to(itmodel.device) ]
+    traj = [torch.zeros(itmodel.bs, itmodel.n).to(itmodel.device)]
     yMF = torch.matmul(itmodel.y, itmodel.H.T).to(itmodel.device)
     s = torch.matmul(yMF, itmodel.Dinv)
     s_hat, _ = itmodel._iterate(num_itr, traj, yMF, s)
@@ -402,7 +405,7 @@ def test_aorcheb_iterate(aorcheb_model, common_data_to_test, num_itr):
 
 
 # Values to test for total_itr
-_total_itr = [ 5, 10 ]
+_total_itr = [5, 10]
 
 
 def common_solve_tests(itmodel, total_itr):

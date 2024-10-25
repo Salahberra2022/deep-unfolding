@@ -6,16 +6,9 @@ import pytest
 import torch
 import torch.nn as nn
 
-from deep_unfolding import (
-    AORNet,
-    RichardsonNet,
-    SORChebyNet,
-    SORNet,
-    _device,
-    evaluate,
-    gen_linear,
-    #train_model,
-)
+from deep_unfolding import (AORNet, RichardsonNet, SORChebyNet,  # train_model,
+                            SORNet, _device, evaluate, gen_linear)
+
 
 # Fixture pour générer les matrices et tensors nécessaires
 @pytest.fixture

@@ -6,8 +6,9 @@
 
 from __future__ import annotations
 
-import math
 import logging
+import math
+
 import numpy as np
 import torch
 from numpy.typing import NDArray
@@ -16,7 +17,9 @@ from torch import Tensor
 logger = logging.getLogger(__name__)
 """Logger for this module."""
 
-_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # GPU, if not CPU
+_device = torch.device(
+    "cuda" if torch.cuda.is_available() else "cpu"
+)  # GPU, if not CPU
 """The device where training will take place."""
 
 logger.info(f"Code run on : {_device}")
@@ -105,33 +108,34 @@ def _decompose_matrix(
     return at, dt, lt, ut, dt_inv, mt_inv
 
 
-def evaluate(model, 
-            type:str="unfolding", 
-            num_itr:int=10,
-            solution: Tensor = None, 
-            device: torch.device = _device,
-            ) : 
-  """Evaluate function
+def evaluate(
+    model,
+    type: str = "unfolding",
+    num_itr: int = 10,
+    solution: Tensor = None,
+    device: torch.device = _device,
+):
+    """Evaluate function
 
-  Args:
-      model (None): Model to be evaluated
-      type (str, optional): Type of the model, can be : "unfolding" or "iterative". Defaults to "unfolding".
-      num_itr (int, optional): Number of iterations choose. Defaults to 10.
-      solution (Tensor, optional): The solution of the linear problem. Defaults to None.
-      device (torch.device, optional): The device. Defaults to _device.
+    Args:
+        model (None): Model to be evaluated
+        type (str, optional): Type of the model, can be : "unfolding" or "iterative". Defaults to "unfolding".
+        num_itr (int, optional): Number of iterations choose. Defaults to 10.
+        solution (Tensor, optional): The solution of the linear problem. Defaults to None.
+        device (torch.device, optional): The device. Defaults to _device.
 
-  Returns:
-      torch.Tensor : The error between the exact solution and the proposed solution
-  """
-  if type == "iterative" :
-    yMF = torch.matmul(model.y, model.H.T)
-    s = torch.matmul(yMF, model.Dinv)
-    traj = []
-    s_hat, _ = model._iterate(num_itr, traj, yMF, s)
-  else : 
-    s_hat, _ = model(num_itr)
-  
-  err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
-                model.n * model.bs
-            )
-  return err
+    Returns:
+        torch.Tensor : The error between the exact solution and the proposed solution
+    """
+    if type == "iterative":
+        yMF = torch.matmul(model.y, model.H.T)
+        s = torch.matmul(yMF, model.Dinv)
+        traj = []
+        s_hat, _ = model._iterate(num_itr, traj, yMF, s)
+    else:
+        s_hat, _ = model(num_itr)
+
+    err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+        model.n * model.bs
+    )
+    return err

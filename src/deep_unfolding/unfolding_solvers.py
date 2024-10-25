@@ -5,6 +5,7 @@
 """Deep unfolding versions of the conventional iterative methods."""
 
 import logging
+
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -14,68 +15,79 @@ from .utils import _decompose_matrix, _device
 # Create a logger for this module
 logger = logging.getLogger(__name__)
 
-class UnfoldingNet(nn.Module) :
 
-  def __init__(
-    self,
-    n: int,
-    a: Tensor,
-    h: Tensor,
-    bs: int,
-    y: Tensor,
-    device: torch.device = _device,
-  ) :
+class UnfoldingNet(nn.Module):
 
-    super().__init__()
-    self.device = device
+    def __init__(
+        self,
+        n: int,
+        a: Tensor,
+        h: Tensor,
+        bs: int,
+        y: Tensor,
+        device: torch.device = _device,
+    ):
 
-    a, d, l, u, _, _ = _decompose_matrix(a, device)  # noqa: E741
+        super().__init__()
+        self.device = device
 
-    self.A = a.to(device)
-    self.D = d.to(device)
-    self.L = l.to(device)
-    self.U = u.to(device)
-    self.H = h.to(device)
-    self.n = n.to(device) # dimension of the solution (can be find from the problem !to be changed)
-    self.Dinv = torch.linalg.inv(d).to(device)
-    self.bs = bs
-    self.y = y.to(device)
+        a, d, l, u, _, _ = _decompose_matrix(a, device)  # noqa: E741
 
-  def deep_train(
-    self,
-    optimizer: torch.optim.Optimizer,
-    loss_func: torch.nn.Module,
-    A: Tensor,
-    b: Tensor,
-    total_itr: int = 25,
-    num_batch: int = 10000,
-) -> list[float]:
-    """Train the given model using the specified optimizer and loss function.
+        self.A = a.to(device)
+        self.D = d.to(device)
+        self.L = l.to(device)
+        self.U = u.to(device)
+        self.H = h.to(device)
+        self.n = n.to(
+            device
+        )  # dimension of the solution (can be find from the problem !to be changed)
+        self.Dinv = torch.linalg.inv(d).to(device)
+        self.bs = bs
+        self.y = y.to(device)
 
-    Args:
-      optimizer: The optimizer to use for training.
-      loss_func: The loss function to use for training.
-      total_itr: The total number of iterations (generations) for training.
-      A: The initial matrix.
-      b: The solution of the linear problem
-      num_batch: The number of batches per iteration.
+    def deep_train(
+        self,
+        optimizer: torch.optim.Optimizer,
+        loss_func: torch.nn.Module,
+        A: Tensor,
+        b: Tensor,
+        total_itr: int = 25,
+        num_batch: int = 10000,
+    ) -> list[float]:
+        """Train the given model using the specified optimizer and loss function.
 
-    Returns:
-      The list of loss values per iteration.
-    """
-    loss_gen = []
-    for gen in range(total_itr):
-        for i in range(num_batch):
-            optimizer.zero_grad()
-            x_hat, _ = self(gen + 1)
-            loss = loss_func(A*x_hat, b) # to avoid using the solution
-            loss.backward()
-            optimizer.step()
+        Args:
+          optimizer: The optimizer to use for training.
+          loss_func: The loss function to use for training.
+          total_itr: The total number of iterations (generations) for training.
+          A: The initial matrix.
+          b: The solution of the linear problem
+          num_batch: The number of batches per iteration.
 
-            if i % 200 == 0:
-                print("generation:", gen + 1, " batch:", i, "\t MSE loss:", loss.item())
-        loss_gen.append(loss.item())
-    return loss_gen
+        Returns:
+          The list of loss values per iteration.
+        """
+        loss_gen = []
+        for gen in range(total_itr):
+            for i in range(num_batch):
+                optimizer.zero_grad()
+                x_hat, _ = self(gen + 1)
+                loss = loss_func(A * x_hat, b)  # to avoid using the solution
+                loss.backward()
+                optimizer.step()
+
+                if i % 200 == 0:
+                    print(
+                        "generation:",
+                        gen + 1,
+                        " batch:",
+                        i,
+                        "\t MSE loss:",
+                        loss.item(),
+                    )
+            loss_gen.append(loss.item())
+        return loss_gen
+
 
 class SORNet(UnfoldingNet):
     """Deep unfolded SOR with a constant step size."""
