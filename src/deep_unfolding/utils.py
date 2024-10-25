@@ -52,14 +52,14 @@ def gen_linear(
     np.random.seed(seed=seed)
     h = np.random.normal(0, 1.0 / math.sqrt(n), (n, m))
     a = np.dot(h, h.T)
-    eig = np.linalg.eig(a)[0]  # Eigenvalues
+    eig = np.linalg.eigvals(a)
 
     wt = Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
     ht = torch.from_numpy(h).float().to(device)  # Define the appropriate 'device'
 
     logger.info(
         f"""
-    - Condition number of A: {np.max(eig) / np.min(eig)}
+    - Condition number of A: {float(np.max(eig)) / float(np.min(eig))}
     - Min eigenvalue of A: {np.min(eig)}
     - Max eigenvalue of A: {np.max(eig)}"""
     )
