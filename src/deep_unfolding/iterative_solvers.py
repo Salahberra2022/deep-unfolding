@@ -115,7 +115,6 @@ class IterativeModel(ABC):
 
         return s_hats
 
-
     def evaluate(
         self,
         solution: Tensor,

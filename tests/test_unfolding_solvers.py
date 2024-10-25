@@ -6,8 +6,8 @@ import pytest
 import torch
 import torch.nn as nn
 
-from deep_unfolding import (AORNet, RichardsonNet, SORChebyNet,  # train_model,
-                            SORNet, _device, gen_linear)
+from deep_unfolding import SORChebyNet  # train_model,
+from deep_unfolding import AORNet, RichardsonNet, SORNet, _device, gen_linear
 
 
 # Fixture pour générer les matrices et tensors nécessaires
@@ -172,7 +172,7 @@ def test_evaluate_model(generate_matrices):
     # TODO Actually norm_list is a float, so the below asserts will always fail
     # TODO What should the evaluate function return? A Tensor or a float?
 
-    #assert len(norm_list) == 4, "Length of norm_list should be equal to total_itr + 1"
+    # assert len(norm_list) == 4, "Length of norm_list should be equal to total_itr + 1"
 
     # assert all(
     #     isinstance(err, float) for err in norm_list

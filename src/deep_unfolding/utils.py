@@ -106,4 +106,3 @@ def _decompose_matrix(
     mt_inv = Tensor(m_inv).to(device)
 
     return at, dt, lt, ut, dt_inv, mt_inv
-
