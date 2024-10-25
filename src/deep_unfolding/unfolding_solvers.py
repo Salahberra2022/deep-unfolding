@@ -4,9 +4,6 @@
 
 """Deep unfolding versions of the conventional iterative methods."""
 
-
-from __future__ import annotations
-
 import logging
 
 import torch
@@ -23,7 +20,6 @@ class UnfoldingNet(nn.Module):
 
     def __init__(
         self,
-        n: int,
         a: Tensor,
         h: Tensor,
         bs: int,
@@ -41,9 +37,6 @@ class UnfoldingNet(nn.Module):
         self.L = l.to(device)
         self.U = u.to(device)
         self.H = h.to(device)
-        self.n = n.to(
-            device
-        )  # dimension of the solution (can be find from the problem !to be changed)
         self.Dinv = torch.linalg.inv(d).to(device)
         self.bs = bs
         self.y = y.to(device)
@@ -93,8 +86,8 @@ class UnfoldingNet(nn.Module):
 
     def evaluate(
         self,
+        solution: Tensor,
         num_itr: int = 10,
-        solution: Tensor | None = None,
         device: torch.device = _device,
     ) -> float:
         """Evaluate function
@@ -110,7 +103,7 @@ class UnfoldingNet(nn.Module):
         s_hat, _ = self(num_itr)
 
         err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
-            self.n * self.bs
+            self.A.shape[0] * self.bs
         )
         return err
 

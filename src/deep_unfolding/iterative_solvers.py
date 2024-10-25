@@ -118,8 +118,8 @@ class IterativeModel(ABC):
 
     def evaluate(
         self,
+        solution: Tensor,
         num_itr: int = 10,
-        solution: Tensor | None = None,
         device: torch.device = _device,
     ) -> float:
         """Evaluate function
