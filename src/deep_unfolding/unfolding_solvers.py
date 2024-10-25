@@ -18,6 +18,30 @@ logger = logging.getLogger(__name__)
 
 class UnfoldingNet(nn.Module):
 
+    A: Tensor
+    """Matrix $A$ of the linear system."""
+
+    D: Tensor
+    """Diagonal matrix $D$."""
+
+    L: Tensor
+    """Lower triangular matrix $L$."""
+
+    U: Tensor
+    """Upper triangular matrix $U$."""
+
+    H: Tensor
+    """Matrix $H$."""
+
+    Dinv: Tensor
+    """Inverse of the diagonal matrix $D$."""
+
+    bs: int
+    """Batch size."""
+
+    y: Tensor
+    """Solution of the linear equation."""
+
     def __init__(
         self,
         a: Tensor,
@@ -117,30 +141,6 @@ class SORNet(UnfoldingNet):
     inv_omega: nn.Parameter
     """Inverse of the relaxation parameter omega."""
 
-    A: Tensor
-    """Matrix $A$ of the linear system."""
-
-    D: Tensor
-    """Diagonal matrix $D$."""
-
-    L: Tensor
-    """Lower triangular matrix $L$."""
-
-    U: Tensor
-    """Upper triangular matrix $U$."""
-
-    H: Tensor
-    """Matrix $H$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution of the linear equation."""
-
     def __init__(
         self,
         a: Tensor,
@@ -204,30 +204,6 @@ class SORChebyNet(UnfoldingNet):
 
     inv_omega: nn.Parameter
     """Inverse of the relaxation parameter omega."""
-
-    A: Tensor
-    """Matrix $A$ of the linear system."""
-
-    D: Tensor
-    """Diagonal matrix $D$."""
-
-    L: Tensor
-    """Lower triangular matrix $L$."""
-
-    U: Tensor
-    """Upper triangular matrix $U$."""
-
-    H: Tensor
-    """Matrix $H$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution of the linear equation."""
 
     def __init__(
         self,
@@ -319,30 +295,6 @@ class AORNet(UnfoldingNet):
     omega: nn.Parameter
     """Relaxation parameter omega."""
 
-    A: Tensor
-    """Matrix $A$ of the linear system."""
-
-    D: Tensor
-    """Diagonal matrix $D$."""
-
-    L: Tensor
-    """Lower triangular matrix $L$."""
-
-    U: Tensor
-    """Upper triangular matrix $U$."""
-
-    H: Tensor
-    """Matrix $H$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution of the linear equation."""
-
     def __init__(
         self,
         a: Tensor,
@@ -406,30 +358,6 @@ class RichardsonNet(UnfoldingNet):
 
     inv_omega: nn.Parameter
     """Inverse of the relaxation parameter omega."""
-
-    A: Tensor
-    """Matrix $A$ of the linear system."""
-
-    D: Tensor
-    """Diagonal matrix $D$."""
-
-    L: Tensor
-    """Lower triangular matrix $L$."""
-
-    U: Tensor
-    """Upper triangular matrix $U$."""
-
-    H: Tensor
-    """Matrix $H$."""
-
-    Dinv: Tensor
-    """Inverse of the diagonal matrix $D$."""
-
-    bs: int
-    """Batch size."""
-
-    y: Tensor
-    """Solution of the linear equation."""
 
     def __init__(
         self,
