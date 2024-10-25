@@ -34,5 +34,4 @@ from deep_unfolding.iterative_solvers import (AOR, SOR, AORCheby, GaussSeidel,
 from deep_unfolding.unfolding_solvers import (AORNet,  # train_model,
                                               RichardsonNet, SORChebyNet,
                                               SORNet)
-from deep_unfolding.utils import (_decompose_matrix, _device, evaluate,
-                                  gen_linear)
+from deep_unfolding.utils import (_decompose_matrix, _device, gen_linear)

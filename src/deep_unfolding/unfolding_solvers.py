@@ -4,6 +4,9 @@
 
 """Deep unfolding versions of the conventional iterative methods."""
 
+
+from __future__ import annotations
+
 import logging
 
 import torch
@@ -87,6 +90,29 @@ class UnfoldingNet(nn.Module):
                     )
             loss_gen.append(loss.item())
         return loss_gen
+
+    def evaluate(
+        self,
+        num_itr: int = 10,
+        solution: Tensor | None = None,
+        device: torch.device = _device,
+    ) -> float:
+        """Evaluate function
+
+        Args:
+            num_itr (int, optional): Number of iterations choose. Defaults to 10.
+            solution (Tensor, optional): The solution of the linear problem. Defaults to None.
+            device (torch.device, optional): The device. Defaults to _device.
+
+        Returns:
+            torch.Tensor : The error between the exact solution and the proposed solution
+        """
+        s_hat, _ = self(num_itr)
+
+        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+            self.n * self.bs
+        )
+        return err
 
 
 class SORNet(UnfoldingNet):

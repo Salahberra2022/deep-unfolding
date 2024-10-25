@@ -116,6 +116,33 @@ class IterativeModel(ABC):
         return s_hats
 
 
+    def evaluate(
+        self,
+        num_itr: int = 10,
+        solution: Tensor | None = None,
+        device: torch.device = _device,
+    ) -> float:
+        """Evaluate function
+
+        Args:
+            num_itr (int, optional): Number of iterations choose. Defaults to 10.
+            solution (Tensor, optional): The solution of the linear problem. Defaults to None.
+            device (torch.device, optional): The device. Defaults to _device.
+
+        Returns:
+            torch.Tensor : The error between the exact solution and the proposed solution
+        """
+        yMF = torch.matmul(self.y, self.H.T)
+        s = torch.matmul(yMF, self.Dinv)
+        traj: list[Tensor] = []
+        s_hat, _ = self._iterate(num_itr, traj, yMF, s)
+
+        err = (torch.norm(solution.to(device) - s_hat.to(device)) ** 2).item() / (
+            self.n * self.bs
+        )
+        return err
+
+
 class GaussSeidel(IterativeModel):
     """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
 
