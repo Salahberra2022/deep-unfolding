@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['3.9', '3.13']
+        version: ['3.9', '3.12']
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
     - name: Clone repository
