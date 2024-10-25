@@ -112,7 +112,7 @@ def evaluate(
     model,
     type: str = "unfolding",
     num_itr: int = 10,
-    solution: Tensor = None,
+    solution: Tensor | None = None,
     device: torch.device = _device,
 ):
     """Evaluate function
