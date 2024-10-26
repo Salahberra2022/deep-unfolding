@@ -16,37 +16,37 @@ from .utils import _decompose_matrix, _device
 class IterativeModel(ABC):
     """Base model class for matrix decomposition and initialization."""
 
-    n: int
+    _n: int
     """Dimension of the solution."""
 
-    H: Tensor
+    _H: Tensor
     """Random matrix $H$."""
 
-    bs: int
+    _bs: int
     """Batch size."""
 
-    y: Tensor
+    _y: Tensor
     """Solution tensor."""
 
-    A: Tensor
+    _A: Tensor
     """Original matrix converted to a torch tensor."""
 
-    D: Tensor
+    _D: Tensor
     """Diagonal matrix of $A$."""
 
-    L: Tensor
+    _L: Tensor
     """Lower triangular matrix of $A$."""
 
-    U: Tensor
+    _U: Tensor
     """Upper triangular matrix of $A$."""
 
-    Dinv: Tensor
+    _Dinv: Tensor
     """Inverse of the diagonal matrix $D$."""
 
-    Minv: Tensor
+    _Minv: Tensor
     """Inverse of the matrix $D + L$."""
 
-    device: torch.device
+    _device: torch.device
     """Device where to run the model."""
 
     _solved: bool
@@ -75,56 +75,64 @@ class IterativeModel(ABC):
 
         Args:
 
+          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        self.n = n
-        self.H = h
-        self.bs = bs
-        self.y = y
-        self.device = device
+        self._n = n
+        self._H = h
+        self._bs = bs
+        self._y = y
+        self._device = device
         self._solved = False
 
         self._s_hats = []
 
-        self.A, self.D, self.L, self.U, self.Dinv, self.Minv = _decompose_matrix(
+        self._A, self._D, self._L, self._U, self._Dinv, self._Minv = _decompose_matrix(
             a, device
         )
 
     @abstractmethod
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Iteration method, to be implemented in subclasses."""
+        """Performs the low-level solver iterations according to the concrete model.
+
+        Args:
+          num_itr: The number of iterations to perform.
+          yMF: The `y` matrix multiplied by the `H` matrix transpose.
+          s: Initial solution.
+        """
         pass
 
     def solve(
         self,
-        total_itr: int = 25,
+        iters: int = 25,
     ) -> list[Tensor]:
-        """Perform iterations using the provided model and calculate the error norm at each iteration.
+        """Solve the linear problem.
 
         Args:
-          total_itr: Total number of iterations to perform.
-          device: Device to run the model on ('cpu' or 'cuda').
+          iters: Number of iterations to perform.
 
         Returns:
-          A tuple with the following contents:
-            - List of tensors representing the solution estimates at each iteration.
+          The solution tensors through the several iterations.
         """
         if self._solved:
             raise RuntimeError("Problem has already been solved!")
 
         self._solved = True
 
-        s = torch.zeros(self.bs, self.n).to(self.device)
+        s = torch.zeros(self._bs, self._n).to(self._device)
         self._s_hats.append(s)
 
-        yMF = torch.matmul(self.y, self.H.T)  # Assuming H is defined
-        s = torch.matmul(yMF, self.Dinv)  # Generate batch initial solution vector
+        yMF = torch.matmul(self._y, self._H.T)
 
-        self._iterate(total_itr, yMF, s)
+        # Generate batch initial solution vector
+        s = torch.matmul(yMF, self._Dinv)
+
+        # Delegate the actual iterations to the concrete solver method
+        self._iterate(iters, yMF, s)
 
         return self._s_hats
 
@@ -134,61 +142,59 @@ class IterativeModel(ABC):
         solution: Tensor,
         device: torch.device = _device,
     ) -> float:
-        """Evaluate function
+        """Low-level evaluation of the method's solution.
 
         Args:
-          TODO.
+          iter: Evaluate the solution at this iteration.
+          solution: The actual solution to the problem.
 
         Returns:
-          TODO
+          The MSE between the real solution and the solution found by the method
+            after `iter` iterations.
         """
         return (
             torch.norm(solution.to(device) - self._s_hats[iter].to(device)) ** 2
-        ).item() / (self.n * self.bs)
+        ).item() / (self._n * self._bs)
 
     def evaluate_final(
         self,
         solution: Tensor,
-        device: torch.device = _device,
     ) -> float:
-        """Evaluate function
+        """Evaluate the final solution found by the method.
 
         Args:
-            num_itr (int, optional): Number of iterations choose. Defaults to 10.
-            solution (Tensor, optional): The solution of the linear problem. Defaults to None.
-            device (torch.device, optional): The device. Defaults to _device.
+          solution: The actual solution to the problem.
 
         Returns:
-            The error between the exact solution and the proposed solution
+          The MSE between the real solution and the final solution found by the
+            method.
         """
         if not self._solved:
             raise RuntimeError("Problem has not been solved yet!")
 
-        return self._evaluate(-1, solution, device)
+        return self._evaluate(-1, solution, self._device)
 
     def evaluate_all(
         self,
         solution: Tensor,
-        device: torch.device = _device,
     ) -> list[float]:
-        """Evaluate function
+        """Evaluate solutions found by the method during all iterations.
 
         Args:
-            num_itr (int, optional): Number of iterations choose. Defaults to 10.
-            solution (Tensor, optional): The solution of the linear problem. Defaults to None.
-            device (torch.device, optional): The device. Defaults to _device.
+          solution: The actual solution to the problem.
 
         Returns:
-            The error between the exact solution and the proposed solution
+          A list containing the MSE between the real solution and the solutions
+            found by the method during the iterative process.
         """
         if not self._solved:
             raise RuntimeError("Problem has not been solved yet!")
 
-        return [self._evaluate(i, solution, device) for i in range(len(self._s_hats))]
+        return [self._evaluate(i, solution, self._device) for i in range(len(self._s_hats))]
 
 
 class GaussSeidel(IterativeModel):
-    """Class implementing the Gauss-Seidel algorithm for solving a linear system."""
+    """The Gauss-Seidel algorithm for solving a linear system."""
 
     def __init__(
         self,
@@ -212,20 +218,14 @@ class GaussSeidel(IterativeModel):
         super().__init__(n, a, h, bs, y, device)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the Gauss-Seidel iterations and returns the final solution
-          and trajectory of solutions.
-
-        Args:
-          num_itr: The number of iterations to perform.
-        """
         for _ in range(num_itr):
-            temp = -torch.matmul(s, self.U) + yMF
-            s = torch.matmul(temp, self.Minv)
+            temp = -torch.matmul(s, self._U) + yMF
+            s = torch.matmul(temp, self._Minv)
             self._s_hats.append(s)
 
 
 class Richardson(IterativeModel):
-    """Class implementing the Richardson iteration algorithm for solving a linear system."""
+    """The Richardson iteration algorithm for solving a linear system."""
 
     omega: Tensor
     """TODO explain what omega is."""
@@ -256,20 +256,14 @@ class Richardson(IterativeModel):
         self.omega = torch.tensor(omega)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the Richardson iterations and returns the final solution and
-          trajectory of solutions.
-
-        Args:
-          num_itr: The number of iterations to perform.
-        """
 
         for _ in range(num_itr):
-            s = s + torch.mul(self.omega, (yMF - torch.matmul(s, self.A)))
+            s = s + torch.mul(self.omega, (yMF - torch.matmul(s, self._A)))
             self._s_hats.append(s)
 
 
 class Jacobi(IterativeModel):
-    """Class implementing the Jacobi iteration algorithm for solving a linear system."""
+    """The Jacobi iteration algorithm for solving a linear system."""
 
     omega: Tensor
     """Relaxation parameter for Jacobi iterations."""
@@ -299,22 +293,15 @@ class Jacobi(IterativeModel):
         self.omega = torch.tensor(omega)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the Jacobi iterations and returns the final solution and
-          trajectory of solutions.
-
-        Args:
-          num_itr: The number of iterations to perform.
-        """
 
         for _ in range(num_itr):
-            temp = torch.matmul(self.Dinv, (self.D - self.A))
-            s = torch.matmul(s, temp) + torch.matmul(yMF, self.Dinv)
+            temp = torch.matmul(self._Dinv, (self._D - self._A))
+            s = torch.matmul(s, temp) + torch.matmul(yMF, self._Dinv)
             self._s_hats.append(s)
 
 
 class SOR(IterativeModel):
-    """Class implementing the Successive Over-Relaxation (SOR) algorithm for
-    solving a linear system."""
+    """The Successive Over-Relaxation (SOR) algorithm for solving a linear system."""
 
     omega: Tensor
     """Relaxation parameter for SOR iterations."""
@@ -344,18 +331,12 @@ class SOR(IterativeModel):
         self.omega = torch.tensor(omega)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the SOR iterations and returns the final solution and
-          trajectory of solutions.
-
-        Args:
-          num_itr: The number of iterations to perform.
-        """
 
         inv_omega = torch.div(1, self.omega)
-        m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
+        m_inv_sor = torch.linalg.inv(self._D - torch.mul(inv_omega, self._L))
 
         for _ in range(num_itr):
-            temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
+            temp = torch.mul((inv_omega - 1), self._D) + torch.mul(inv_omega, self._U)
             s = torch.matmul(s, torch.matmul(m_inv_sor, temp)) + torch.matmul(
                 yMF, m_inv_sor
             )
@@ -363,7 +344,7 @@ class SOR(IterativeModel):
 
 
 class SORCheby(IterativeModel):
-    """Class implementing the SOR-Chebyshev algorithm for solving a linear system."""
+    """The SOR-Chebyshev algorithm for solving a linear system."""
 
     omega: Tensor
     """Relaxation parameter for SOR iterations."""
@@ -405,21 +386,15 @@ class SORCheby(IterativeModel):
         self.gamma = torch.tensor(gamma)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the SOR-Chebyshev iterations and returns the final solution
-          and trajectory of solutions.
-
-        Args:
-          num_itr: The number of iterations to perform.
-        """
 
         inv_omega = torch.div(1, self.omega)
-        m_inv_sor = torch.linalg.inv(self.D - torch.mul(inv_omega, self.L))
+        m_inv_sor = torch.linalg.inv(self._D - torch.mul(inv_omega, self._L))
 
         s_present = s
-        s_old = torch.zeros(s_present.shape).to(self.device)
+        s_old = torch.zeros(s_present.shape).to(self._device)
 
         for _ in range(num_itr):
-            temp = torch.mul((inv_omega - 1), self.D) + torch.mul(inv_omega, self.U)
+            temp = torch.mul((inv_omega - 1), self._D) + torch.mul(inv_omega, self._U)
             s = torch.matmul(s, torch.matmul(m_inv_sor, temp)) + torch.matmul(
                 yMF, m_inv_sor
             )
@@ -435,8 +410,7 @@ class SORCheby(IterativeModel):
 
 
 class AOR(IterativeModel):
-    """Class implementing the Accelerated Over-Relaxation (AOR) algorithm for
-    solving a linear system."""
+    """The Accelerated Over-Relaxation (AOR) algorithm for solving a linear system."""
 
     omega: Tensor
     """Relaxation parameter for AOR iterations."""
@@ -472,21 +446,15 @@ class AOR(IterativeModel):
         self.r = torch.tensor(r)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the AOR iterations and returns the final solution and
-          trajectory of solutions.
 
-        Args:
-          num_itr: The number of iterations to perform.
-        """
-
-        m = self.D - torch.mul(self.r, self.L)
+        m = self._D - torch.mul(self.r, self._L)
         m_inv_aor = torch.linalg.inv(m)
 
         # ! bug : difference between n and self.n (some ambiguity)
         n = (
-            torch.mul((1 - self.omega), self.D)
-            + torch.mul((self.omega - self.r), self.L)
-            + torch.mul(self.omega, self.U)
+            torch.mul((1 - self.omega), self._D)
+            + torch.mul((self.omega - self.r), self._L)
+            + torch.mul(self.omega, self._U)
         )
 
         for _ in range(num_itr):
@@ -497,8 +465,7 @@ class AOR(IterativeModel):
 
 
 class AORCheby(IterativeModel):
-    """Class implementing the Accelerated Over-Relaxation (AOR) with Chebyshev
-    acceleration algorithm for solving a linear system."""
+    """The AOR with Chebyshev acceleration algorithm for solving a linear system."""
 
     omega: Tensor
     """Relaxation parameter for AOR iterations."""
@@ -534,21 +501,15 @@ class AORCheby(IterativeModel):
         self.r = torch.tensor(r)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
-        """Performs the AOR-Chebyshev iterations and returns the final solution
-          and trajectory of solutions.
-
-        Args:
-          num_itr: The number of iterations to perform.
-        """
 
         y0 = s
 
-        m = self.D - torch.mul(self.r, self.L)
+        m = self._D - torch.mul(self.r, self._L)
         m_inv = torch.linalg.inv(m)
         n = (
-            torch.mul((1 - self.omega), self.D)
-            + torch.mul((self.omega - self.r), self.L)
-            + torch.mul(self.omega, self.U)
+            torch.mul((1 - self.omega), self._D)
+            + torch.mul((self.omega - self.r), self._L)
+            + torch.mul(self.omega, self._U)
         )
         temp = torch.matmul(m_inv, n)
 
