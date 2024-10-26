@@ -14,15 +14,15 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
-logger = logging.getLogger(__name__)
-"""Logger for this module."""
-
 _device = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )  # GPU, if not CPU
 """The device where training will take place."""
 
-logger.info(f"Code run on : {_device}")
+_logger = logging.getLogger(__name__)
+"""Logger for this module."""
+
+_logger.info(f"By default, code will run on {_device} device")
 
 
 def gen_linear(
@@ -57,7 +57,7 @@ def gen_linear(
     wt = Tensor(np.diag(eig)).to(device)  # Define the appropriate 'device'
     ht = torch.from_numpy(h).float().to(device)  # Define the appropriate 'device'
 
-    logger.info(
+    _logger.info(
         f"""
     - Condition number of A: {float(np.max(eig)) / float(np.min(eig))}
     - Min eigenvalue of A: {np.min(eig)}
