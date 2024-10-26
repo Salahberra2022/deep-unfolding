@@ -4,6 +4,7 @@
 
 """Conventional iterative methods."""
 
+import logging
 from abc import ABC, abstractmethod
 
 import torch
@@ -12,9 +13,15 @@ from torch import Tensor
 
 from .utils import _decompose_matrix, _device
 
+_logger = logging.getLogger(__name__)
+"""Logger for this module."""
+
 
 class IterativeModel(ABC):
     """Base model class for matrix decomposition and initialization."""
+
+    _A: Tensor
+    """Original matrix converted to a torch tensor."""
 
     _H: Tensor
     """Random matrix $H$."""
@@ -24,9 +31,6 @@ class IterativeModel(ABC):
 
     _y: Tensor
     """Solution tensor."""
-
-    _A: Tensor
-    """Original matrix converted to a torch tensor."""
 
     _D: Tensor
     """Diagonal matrix of $A$."""
@@ -88,6 +92,8 @@ class IterativeModel(ABC):
         self._A, self._D, self._L, self._U, self._Dinv, self._Minv = _decompose_matrix(
             a, device
         )
+
+        _logger.info(f"Code run on : {_device}")
 
     @abstractmethod
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
@@ -184,7 +190,9 @@ class IterativeModel(ABC):
         if not self._solved:
             raise RuntimeError("Problem has not been solved yet!")
 
-        return [self._evaluate(i, solution, self._device) for i in range(len(self._s_hats))]
+        return [
+            self._evaluate(i, solution, self._device) for i in range(len(self._s_hats))
+        ]
 
 
 class GaussSeidel(IterativeModel):
