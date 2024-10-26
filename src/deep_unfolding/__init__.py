@@ -25,15 +25,9 @@ __all__ = [
     "SORNet",
 ]
 
-from deep_unfolding.iterative_solvers import (
-    AOR,
-    SOR,
-    AORCheby,
-    GaussSeidel,
-    IterativeModel,
-    Jacobi,
-    Richardson,
-    SORCheby,
-)
-from deep_unfolding.unfolding_solvers import AORNet, RichardsonNet, SORChebyNet, SORNet
+from deep_unfolding.iterative_solvers import (AOR, SOR, AORCheby, GaussSeidel,
+                                              IterativeModel, Jacobi,
+                                              Richardson, SORCheby)
+from deep_unfolding.unfolding_solvers import (AORNet, RichardsonNet,
+                                              SORChebyNet, SORNet)
 from deep_unfolding.utils import gen_linear
