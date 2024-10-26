@@ -13,8 +13,6 @@ __all__ = [
     "AORCheby",
     "AORNet",
     "IterativeModel",
-    "_decompose_matrix",
-    "_device",
     "evaluate_model",
     "gen_linear",
     "GaussSeidel",
@@ -25,7 +23,6 @@ __all__ = [
     "SORCheby",
     "SORChebyNet",
     "SORNet",
-    # "train_model",
 ]
 
 from deep_unfolding.iterative_solvers import (
@@ -38,6 +35,5 @@ from deep_unfolding.iterative_solvers import (
     Richardson,
     SORCheby,
 )
-from deep_unfolding.unfolding_solvers import AORNet  # train_model,
-from deep_unfolding.unfolding_solvers import RichardsonNet, SORChebyNet, SORNet
-from deep_unfolding.utils import _decompose_matrix, _device, gen_linear
+from deep_unfolding.unfolding_solvers import AORNet, RichardsonNet, SORChebyNet, SORNet
+from deep_unfolding.utils import gen_linear
