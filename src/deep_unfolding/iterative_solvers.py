@@ -16,9 +16,6 @@ from .utils import _decompose_matrix, _device
 class IterativeModel(ABC):
     """Base model class for matrix decomposition and initialization."""
 
-    _n: int
-    """Dimension of the solution."""
-
     _H: Tensor
     """Random matrix $H$."""
 
@@ -64,7 +61,6 @@ class IterativeModel(ABC):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -75,14 +71,12 @@ class IterativeModel(ABC):
 
         Args:
 
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
           y: Solution tensor.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        self._n = n
         self._H = h
         self._bs = bs
         self._y = y
@@ -123,7 +117,7 @@ class IterativeModel(ABC):
 
         self._solved = True
 
-        s = torch.zeros(self._bs, self._n).to(self._device)
+        s = torch.zeros(self._bs, self._A.shape[0]).to(self._device)
         self._s_hats.append(s)
 
         yMF = torch.matmul(self._y, self._H.T)
@@ -154,7 +148,7 @@ class IterativeModel(ABC):
         """
         return (
             torch.norm(solution.to(device) - self._s_hats[iter].to(device)) ** 2
-        ).item() / (self._n * self._bs)
+        ).item() / (self._A.shape[0] * self._bs)
 
     def evaluate_final(
         self,
@@ -198,7 +192,6 @@ class GaussSeidel(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -208,14 +201,13 @@ class GaussSeidel(IterativeModel):
         """Initialize the Gauss-Seidel solver.
 
         Args:
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix H.
           bs: Batch size.
           y: Solution tensor.
           device: Device to run the model on ('cpu' or 'cuda').
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
         for _ in range(num_itr):
@@ -232,7 +224,6 @@ class Richardson(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -243,7 +234,6 @@ class Richardson(IterativeModel):
         """Initialize the Richardson iteration solver.
 
         Args:
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
@@ -251,7 +241,7 @@ class Richardson(IterativeModel):
           omega: TODO explain.
           device: Device where to run the model.
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
 
         self.omega = torch.tensor(omega)
 
@@ -270,7 +260,6 @@ class Jacobi(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -281,7 +270,6 @@ class Jacobi(IterativeModel):
         """Initialize the Jacobi iteration solver.
 
         Args:
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
@@ -289,7 +277,7 @@ class Jacobi(IterativeModel):
           omega: Relaxation parameter for Jacobi iterations.
           device: Device where to run the model.
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
@@ -308,7 +296,6 @@ class SOR(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -319,7 +306,6 @@ class SOR(IterativeModel):
         """Initialize the SOR solver.
 
         Args:
-          n: Dimension of the solution.
           A: Input square matrix to decompose.
           H: Random matrix $H$.
           bs: Batch size.
@@ -327,7 +313,7 @@ class SOR(IterativeModel):
           omega: Relaxation parameter for SOR iterations.
           device: Device where to run the model.
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
         self.omega = torch.tensor(omega)
 
     def _iterate(self, num_itr: int, yMF: Tensor, s: Tensor) -> None:
@@ -357,7 +343,6 @@ class SORCheby(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -370,7 +355,6 @@ class SORCheby(IterativeModel):
         """Initialize the SOR-Chebyshev solver.
 
         Args:
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
@@ -380,7 +364,7 @@ class SORCheby(IterativeModel):
           gamma: Damping factor for SOR-Chebyshev iterations.
           device: Device where to run the model.
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
         self.omega = torch.tensor(omega)
         self.omegaa = torch.tensor(omegaa)
         self.gamma = torch.tensor(gamma)
@@ -420,7 +404,6 @@ class AOR(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -432,7 +415,6 @@ class AOR(IterativeModel):
         """Initialize the AOR solver.
 
         Args:
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
@@ -441,7 +423,7 @@ class AOR(IterativeModel):
           r: Relaxation parameter.
           device: Device where to run the model.
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
@@ -475,7 +457,6 @@ class AORCheby(IterativeModel):
 
     def __init__(
         self,
-        n: int,
         a: NDArray,
         h: Tensor,
         bs: int,
@@ -487,7 +468,6 @@ class AORCheby(IterativeModel):
         """Initialize the AOR-Chebyshev solver.
 
         Args:
-          n: Dimension of the solution.
           a: Input square matrix to decompose.
           h: Random matrix $H$.
           bs: Batch size.
@@ -496,7 +476,7 @@ class AORCheby(IterativeModel):
           r: Relaxation parameter.
           device: Device where to run the model.
         """
-        super().__init__(n, a, h, bs, y, device)
+        super().__init__(a, h, bs, y, device)
         self.omega = torch.tensor(omega)
         self.r = torch.tensor(r)
 
