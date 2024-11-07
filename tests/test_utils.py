@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 import torch
 
-from deep_unfolding import _decompose_matrix, gen_linear
+from deep_unfolding import gen_linear
+from deep_unfolding.utils import _decompose_matrix
 
 
 @pytest.fixture
@@ -17,9 +18,9 @@ def generate_data():
     bs = 10
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
-    )  # Vous pouvez aussi tester sur GPU si disponible
+    )  # We can also test on a GPU if available
 
-    # Appeler la fonction
+    # Invoke the function
     return gen_linear(n, m, seed, bs, device)
 
 
