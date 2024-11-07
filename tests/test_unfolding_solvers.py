@@ -6,8 +6,9 @@ import pytest
 import torch
 import torch.nn as nn
 
-from deep_unfolding import SORChebyNet  # train_model,
-from deep_unfolding import AORNet, RichardsonNet, SORNet, _device, gen_linear
+from deep_unfolding import (AORNet, RichardsonNet, SORChebyNet, SORNet,
+                            gen_linear)
+from deep_unfolding.utils import _device
 
 
 # Fixture pour générer les matrices et tensors nécessaires
