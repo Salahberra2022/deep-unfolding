@@ -8,7 +8,6 @@ import torch
 
 from deep_unfolding import (AOR, SOR, AORCheby, GaussSeidel, Jacobi,
                             Richardson, SORCheby)
-
 from deep_unfolding.utils import _decompose_matrix
 
 # ############################################################ #
@@ -361,7 +360,10 @@ def common_iterate_tests(itmodel, common_data_to_test, num_itr):
     assert itmodel._solved, "Model instance should have been solved"
 
     # Now we can check the final solution (after we have set the _solved flag to True)
-    assert itmodel.s_hat.shape == (bs, A.shape[0]), "Final solution tensor should have shape (bs, n)"
+    assert itmodel.s_hat.shape == (
+        bs,
+        A.shape[0],
+    ), "Final solution tensor should have shape (bs, n)"
 
 
 @pytest.mark.parametrize("num_itr", _num_itr_to_test)
