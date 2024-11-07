@@ -7,7 +7,9 @@ import pytest
 import torch
 
 from deep_unfolding import (AOR, SOR, AORCheby, GaussSeidel, Jacobi,
-                            Richardson, SORCheby, _decompose_matrix)
+                            Richardson, SORCheby)
+
+from deep_unfolding.utils import _decompose_matrix
 
 # ############################################################ #
 # ############### Parameters to use in tests ################# #
@@ -88,15 +90,7 @@ def common_data_to_test(
         .float()
         .to(device_to_test)
     )
-    return n_to_test, A, H, bs_to_test, y, device_to_test
-
-
-# TODO This fixture is not currently being used, check if it's necessary to keep it
-@pytest.fixture()
-def solution_to_test(common_data_to_test, rng_for_tests):
-    """Solution to test."""
-    n, _, _, bs, _, device = common_data_to_test
-    return torch.from_numpy(rng_for_tests.random((bs, n))).float().to(device)
+    return A, H, bs_to_test, y, device_to_test
 
 
 # ######################################### #
@@ -162,29 +156,29 @@ def aorcheb_r_to_test(request):
 @pytest.fixture()
 def gs_model(common_data_to_test):
     """Create and return a Gauss-Seidel model."""
-    n, A, H, bs, y, device = common_data_to_test
-    return GaussSeidel(n, A, H, bs, y, device)
+    A, H, bs, y, device = common_data_to_test
+    return GaussSeidel(A, H, bs, y, device)
 
 
 @pytest.fixture()
 def ri_model(common_data_to_test, ri_omega_to_test):
     """Create and return a Richardson model."""
-    n, A, H, bs, y, device = common_data_to_test
-    return Richardson(n, A, H, bs, y, ri_omega_to_test, device)
+    A, H, bs, y, device = common_data_to_test
+    return Richardson(A, H, bs, y, ri_omega_to_test, device)
 
 
 @pytest.fixture()
 def jac_model(common_data_to_test, jac_omega_to_test):
     """Create and return a Jacobi model."""
-    n, A, H, bs, y, device = common_data_to_test
-    return Jacobi(n, A, H, bs, y, jac_omega_to_test, device)
+    A, H, bs, y, device = common_data_to_test
+    return Jacobi(A, H, bs, y, jac_omega_to_test, device)
 
 
 @pytest.fixture()
 def sor_model(common_data_to_test, sor_omega_to_test):
     """Create and return a SOR model."""
-    n, A, H, bs, y, device = common_data_to_test
-    return SOR(n, A, H, bs, y, sor_omega_to_test, device)
+    A, H, bs, y, device = common_data_to_test
+    return SOR(A, H, bs, y, sor_omega_to_test, device)
 
 
 @pytest.fixture()
@@ -195,9 +189,8 @@ def sorcheb_model(
     sorcheb_gamma_to_test,
 ):
     """Create and return a SOR-Chebyshev model."""
-    n, A, H, bs, y, device = common_data_to_test
+    A, H, bs, y, device = common_data_to_test
     return SORCheby(
-        n,
         A,
         H,
         bs,
@@ -212,15 +205,15 @@ def sorcheb_model(
 @pytest.fixture()
 def aor_model(common_data_to_test, aor_omega_to_test, aor_r_to_test):
     """Create and return an AOR model."""
-    n, A, H, bs, y, device = common_data_to_test
-    return AOR(n, A, H, bs, y, aor_omega_to_test, aor_r_to_test, device)
+    A, H, bs, y, device = common_data_to_test
+    return AOR(A, H, bs, y, aor_omega_to_test, aor_r_to_test, device)
 
 
 @pytest.fixture()
 def aorcheb_model(common_data_to_test, aorcheb_omega_to_test, aorcheb_r_to_test):
     """Create and return an AOR model."""
-    n, A, H, bs, y, device = common_data_to_test
-    return AORCheby(n, A, H, bs, y, aorcheb_omega_to_test, aorcheb_r_to_test, device)
+    A, H, bs, y, device = common_data_to_test
+    return AORCheby(A, H, bs, y, aorcheb_omega_to_test, aorcheb_r_to_test, device)
 
 
 # ############################ #
@@ -230,32 +223,31 @@ def aorcheb_model(common_data_to_test, aorcheb_omega_to_test, aorcheb_r_to_test)
 
 def common_initialization_tests(itmodel, common_data_to_test):
     """Helper function to perform common initialization checks."""
-    n, A, H, bs, y, device = common_data_to_test
+    A, H, bs, y, device = common_data_to_test
 
-    assert itmodel.n == n, "Attribute n should be initialized correctly"
-    assert itmodel.H.shape == H.shape, "Attribute H should be initialized correctly"
-    assert itmodel.bs == bs, "Attribute bs should be initialized correctly"
-    assert itmodel.y.shape == y.shape, "Attribute y should be initialized correctly"
-    assert itmodel.device == device, "Device should be initialized correctly"
+    assert itmodel._H.shape == H.shape, "Attribute H should be initialized correctly"
+    assert itmodel._bs == bs, "Attribute bs should be initialized correctly"
+    assert itmodel._y.shape == y.shape, "Attribute y should be initialized correctly"
+    assert itmodel._device == device, "Device should be initialized correctly"
 
     A_torch, D, L, U, Dinv, Minv = _decompose_matrix(A, device)
     assert torch.allclose(
-        itmodel.A, A_torch
+        itmodel._A, A_torch
     ), "Attribute A should match the decomposed matrix"
     assert torch.allclose(
-        itmodel.D, D
+        itmodel._D, D
     ), "Attribute D should match the decomposed matrix"
     assert torch.allclose(
-        itmodel.L, L
+        itmodel._L, L
     ), "Attribute L should match the decomposed matrix"
     assert torch.allclose(
-        itmodel.U, U
+        itmodel._U, U
     ), "Attribute U should match the decomposed matrix"
     assert torch.allclose(
-        itmodel.Dinv, Dinv
+        itmodel._Dinv, Dinv
     ), "Attribute Dinv should match the decomposed matrix"
     assert torch.allclose(
-        itmodel.Minv, Minv
+        itmodel._Minv, Minv
     ), "Attribute Minv should match the decomposed matrix"
 
 
@@ -342,19 +334,34 @@ _num_itr_to_test = [5, 10]
 
 def common_iterate_tests(itmodel, common_data_to_test, num_itr):
     """Common code for testing _iterate() for each model."""
-    n, _, _, bs, _, _ = common_data_to_test
+    A, _, bs, _, _ = common_data_to_test
 
-    traj = [torch.zeros(itmodel.bs, itmodel.n).to(itmodel.device)]
-    yMF = torch.matmul(itmodel.y, itmodel.H.T).to(itmodel.device)
-    s = torch.matmul(yMF, itmodel.Dinv)
-    s_hat, _ = itmodel._iterate(num_itr, traj, yMF, s)
+    yMF = torch.matmul(itmodel._y, itmodel._H.T).to(itmodel._device)
+    s = torch.matmul(yMF, itmodel._Dinv)
+    itmodel._iterate(num_itr, yMF, s)
 
-    assert len(traj) == num_itr + 1, "Trajectory should contain num_itr + 1 elements"
-    assert traj[0].shape == (
+    assert len(itmodel._s_hats) == num_itr, "Trajectory should contain num_itr elements"
+    assert itmodel._s_hats[0].shape == (
         bs,
-        n,
+        A.shape[0],
     ), "Each element in the trajectory should have shape (bs, n)"
-    assert s_hat.shape == (bs, n), "Final solution tensor should have shape (bs, n)"
+
+    # Since we called _iterate() and not solved, the instance should have
+    # _solved set to False
+    assert not itmodel._solved, "Model instance should not yet be solved"
+
+    # Trying to get the final solution at this time should yield a RuntimeError
+    with pytest.raises(RuntimeError, match="Problem has not been solved yet!"):
+        _ = itmodel.s_hat.shape
+
+    # Mark it as solved manually (client code should never do this directly)
+    itmodel._solved = True
+
+    # Check that it worked
+    assert itmodel._solved, "Model instance should have been solved"
+
+    # Now we can check the final solution (after we have set the _solved flag to True)
+    assert itmodel.s_hat.shape == (bs, A.shape[0]), "Final solution tensor should have shape (bs, n)"
 
 
 @pytest.mark.parametrize("num_itr", _num_itr_to_test)
