@@ -1,10 +1,13 @@
+[development version]
+- Major refactoring (in progress)
+
 [V0.2.0]
 - Added V1 of the documentation website of the project
-- Added default values for all trainable models 
-- In progress
+- Added default values for all trainable models
+
 [V0.1.0]
 - Set up the initial version of the package
-- Implementing some conventional approaches to approximate the solution of linear equations : 
+- Implementing some conventional approaches to approximate the solution of linear equations :
     - Gauss-Seidel (GS) algorithm
     - Richardson iteration algorithm
     - Jacobi iteration (RI) algorithm
